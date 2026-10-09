@@ -49,6 +49,15 @@ export default function Home() {
           ))}
         </ul>
       </section>
+
+      <footer className="flex gap-6 text-xs text-ink-dim">
+        <Link href="/privacy" className="hover:text-ink">
+          Privacy
+        </Link>
+        <Link href="/terms" className="hover:text-ink">
+          Terms
+        </Link>
+      </footer>
     </main>
   );
 }
