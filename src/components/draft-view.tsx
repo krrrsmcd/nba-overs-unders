@@ -81,7 +81,7 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
           <SectionBar>{myTurn ? "PICK A TEAM" : "TEAM BOARD"}</SectionBar>
           <DraftBoard leagueId={league.id} teams={NBA_TEAMS} taken={taken} myTurn={myTurn} />
           <p className="mt-3 text-xs text-ink-dim">
-            Projected records from{" "}
+            Preseason win totals (over/under) from{" "}
             <a href={PROJECTION_SOURCE.url} target="_blank" rel="noreferrer" className="underline hover:text-ink">
               {PROJECTION_SOURCE.label}
             </a>

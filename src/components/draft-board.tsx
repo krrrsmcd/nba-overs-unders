@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { makePick } from "@/app/actions";
 import { Modal } from "@/components/modal";
 import { buttonClass, smallButtonClass } from "@/components/ui";
-import { GAMES_PER_TEAM, type TeamSeed } from "@/db/teams";
+import type { TeamSeed } from "@/db/teams";
 
 export type TakenInfo = { side: "W" | "L"; owner: string; pickNumber: number };
 
@@ -86,10 +86,8 @@ export function DraftBoard({
                   {t.city} {t.name}
                 </span>
                 <span className="mt-auto flex items-baseline gap-1 whitespace-nowrap bg-black/60 px-1.5 py-0.5 text-white">
-                  <span className="font-pixel text-[7px] opacity-80">PROJ</span>
-                  <span className="text-xs font-semibold tabular-nums">
-                    {t.projectedWins}–{GAMES_PER_TEAM - t.projectedWins}
-                  </span>
+                  <span className="font-pixel text-[7px] opacity-80">BETMGM O/U</span>
+                  <span className="text-xs font-semibold tabular-nums">{t.projectedWins}</span>
                 </span>
                 {tk && (
                   <span className="font-pixel mt-1 bg-black/80 px-1 py-0.5 text-[8px] leading-tight text-white">
@@ -115,7 +113,7 @@ export function DraftBoard({
                 {selected.city} {selected.name}
               </p>
               <p className="font-pixel mt-1 text-[10px] text-white [text-shadow:1px_1px_0_#000]">
-                PROJECTED {selected.projectedWins}–{GAMES_PER_TEAM - selected.projectedWins}
+                BETMGM WIN TOTAL: {selected.projectedWins}
               </p>
             </div>
 
