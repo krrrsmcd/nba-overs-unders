@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SignInButton } from "@/components/auth-buttons";
 import { DraftView } from "@/components/draft-view";
+import { SeasonView } from "@/components/season-view";
 import { CopyButton, RegenerateInviteButton, TeamNameForm } from "@/components/lobby-controls";
 import { PageShell } from "@/components/page-shell";
 import { StartDraftButton } from "@/components/start-draft";
@@ -43,7 +44,8 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
   }
 
   const { league, player } = me;
-  if (league.status !== "setup") return <DraftView league={league} me={player} />;
+  if (league.status === "complete") return <SeasonView league={league} me={player} />;
+  if (league.status === "drafting") return <DraftView league={league} me={player} />;
 
   const [players, origin] = await Promise.all([getLeaguePlayers(league.id), getOrigin()]);
   const openSlots = league.size - players.length;
