@@ -103,7 +103,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     {ordinal(r.rank)}
                   </span>
                   <span className="flex min-w-0 flex-1 items-center gap-2">
-                    <span className="truncate font-display text-lg leading-tight">{r.teamName}</span>
+                    <span className="min-w-0 font-display text-lg leading-tight break-words">{r.teamName}</span>
                     {r.playerId === me.id && <Badge tone="cyan">YOU</Badge>}
                   </span>
                   <span className="flex flex-col items-end leading-none">
@@ -117,39 +117,38 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     <span className="hidden group-open:inline">▾</span>
                   </span>
                 </summary>
-                <ul className="flex flex-col gap-1.5 border-t-2 border-bg px-4 pt-3 pb-4">
-                  <li className="font-pixel flex items-center gap-2 text-[8px] text-ink-dim" aria-hidden>
+                <ul className="flex flex-col gap-2 border-t-2 border-bg px-3 pt-3 pb-4 sm:px-4">
+                  <li className="font-pixel flex items-center gap-1.5 text-[8px] text-ink-dim" aria-hidden>
                     <span className="flex-1">TEAM</span>
-                    <span className="w-8 text-center">PICK</span>
-                    <span className="w-12 text-right">W–L</span>
-                    <span className="w-8 text-right">PTS</span>
-                    <span className="w-9 text-right">PROJ</span>
+                    <span className="w-7 text-center">PICK</span>
+                    <span className="w-10 text-right">W–L</span>
+                    <span className="w-7 text-right">PTS</span>
+                    <span className="w-8 text-right">PROJ</span>
                   </li>
                   {r.picks.map((pk) => {
                     const t = TEAM_BY_ID.get(pk.nbaTeamId)!;
                     return (
-                      <li key={pk.nbaTeamId} className="flex items-center gap-2 text-sm">
+                      <li key={pk.nbaTeamId} className="flex items-center gap-1.5 text-[13px] leading-tight">
                         <span
-                          className="font-pixel w-11 shrink-0 px-1 py-0.5 text-center text-[9px] text-white"
+                          className="font-pixel w-10 shrink-0 px-0.5 py-0.5 text-center text-[9px] text-white"
                           style={{ background: t.primaryColor }}
                         >
                           {t.id}
                         </span>
-                        <span className="min-w-0 flex-1 truncate">
-                          <span className="hidden sm:inline">{t.city} </span>
-                          {t.name}
+                        <span className="min-w-0 flex-1 break-words">
+                          {t.city} {t.name}
                         </span>
                         <span
-                          className={`font-pixel w-8 text-center text-[10px] ${pk.side === "W" ? "text-win" : "text-loss"}`}
+                          className={`font-pixel w-7 text-center text-[10px] ${pk.side === "W" ? "text-win" : "text-loss"}`}
                           title={pk.side === "W" ? "Wins" : "Losses"}
                         >
                           {pk.side}
                         </span>
-                        <span className="w-12 text-right text-xs tabular-nums text-ink-dim">
+                        <span className="w-10 text-right text-xs tabular-nums text-ink-dim">
                           {pk.record.wins}–{pk.record.losses}
                         </span>
-                        <span className="w-8 text-right font-semibold tabular-nums">{pk.points}</span>
-                        <span className="w-9 text-right text-xs tabular-nums text-ink-dim">
+                        <span className="w-7 text-right font-semibold tabular-nums">{pk.points}</span>
+                        <span className="w-8 text-right text-xs tabular-nums text-ink-dim">
                           {Math.round(pk.projected)}
                         </span>
                       </li>

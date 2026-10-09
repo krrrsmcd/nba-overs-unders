@@ -11,6 +11,17 @@ export const SERIES_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d551
 const H = 260;
 const PAD = { top: 16, right: 92, bottom: 28, left: 36 };
 
+/** Break a name into lines of at most `max` characters (words kept whole where possible). */
+function wrap(name: string, max = 12): string[] {
+  const lines: string[] = [];
+  for (const word of name.split(/\s+/)) {
+    const last = lines.at(-1);
+    if (last !== undefined && (last + " " + word).length <= max) lines[lines.length - 1] = `${last} ${word}`;
+    else for (let i = 0; i < Math.max(1, word.length); i += max) lines.push(word.slice(i, i + max));
+  }
+  return lines;
+}
+
 function niceStep(max: number) {
   const raw = max / 4;
   const pow = 10 ** Math.floor(Math.log10(Math.max(raw, 1)));
@@ -50,13 +61,16 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
   const ends = lines
     .map((l, i) => ({ l, color: SERIES_COLORS[i % SERIES_COLORS.length], v: l.values.at(-1) ?? 0 }))
     .sort((a, b) => b.v - a.v);
-  const placed: number[] = [];
-  const endLabels = ends.filter((e) => {
-    const yy = y(e.v);
-    if (placed.some((p) => Math.abs(p - yy) < 14)) return false;
-    placed.push(yy);
-    return true;
-  });
+  const placed: [number, number][] = [];
+  const endLabels = ends
+    .map((e) => ({ ...e, lines: wrap(e.l.name) }))
+    .filter((e) => {
+      const top = y(e.v) - 4;
+      const bottom = top + e.lines.length * 13;
+      if (placed.some(([a, b]) => top < b + 2 && bottom > a - 2)) return false;
+      placed.push([top, bottom]);
+      return true;
+    });
 
   const hi = hover ?? n - 1;
   const tooltipRows = lines
@@ -116,7 +130,11 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
 
           {endLabels.map((e) => (
             <text key={e.l.id} x={x(n - 1) + 10} y={y(e.v) + 4} fontSize={11} fill="#f4f1ff">
-              {e.l.name.length > 12 ? `${e.l.name.slice(0, 11)}…` : e.l.name}
+              {e.lines.map((line, k) => (
+                <tspan key={k} x={x(n - 1) + 10} dy={k ? 13 : 0}>
+                  {line}
+                </tspan>
+              ))}
             </text>
           ))}
 

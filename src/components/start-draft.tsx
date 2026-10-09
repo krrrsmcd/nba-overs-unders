@@ -131,7 +131,7 @@ function SortableRow({ p, index }: { p: P; index: number }) {
       {...listeners}
     >
       <span className="font-pixel w-8 text-xs text-yellow">#{index + 1}</span>
-      <span className="flex-1 truncate font-medium">{p.teamName}</span>
+      <span className="min-w-0 flex-1 font-medium break-words">{p.teamName}</span>
       <span aria-hidden className="font-pixel text-xs text-ink-dim">
         ≡
       </span>

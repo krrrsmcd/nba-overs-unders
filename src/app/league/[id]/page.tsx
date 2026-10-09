@@ -133,7 +133,7 @@ function PlayerRow({ p, label, isMe }: { p: Player; label: string; isMe: boolean
   return (
     <li className="pixel-border flex items-center gap-3 bg-panel p-3">
       <span className="font-pixel w-8 text-xs text-yellow">{label}</span>
-      <span className="flex-1 truncate font-medium">{p.teamName}</span>
+      <span className="min-w-0 flex-1 font-medium break-words">{p.teamName}</span>
       <span className="flex flex-wrap justify-end gap-1">
         {p.isCommissioner && <Badge tone="yellow">COMMISH</Badge>}
         {isMe && <Badge tone="cyan">YOU</Badge>}

@@ -110,7 +110,7 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
               <Panel key={p.id} className={onClock?.id === p.id ? "border-yellow" : ""}>
                 <div className="mb-3 flex items-center gap-2">
                   <span className="font-pixel text-[10px] text-yellow">#{i + 1}</span>
-                  <span className="flex-1 truncate font-display text-lg leading-tight">{p.teamName}</span>
+                  <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{p.teamName}</span>
                   {p.id === me.id && <Badge tone="cyan">YOU</Badge>}
                 </div>
                 {mine.length === 0 ? (
@@ -127,7 +127,7 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
                           >
                             {t.id}
                           </span>
-                          <span className="flex-1 truncate">
+                          <span className="min-w-0 flex-1 break-words">
                             {t.city} {t.name}
                           </span>
                           <span className={`font-pixel text-[9px] ${pk.side === "W" ? "text-win" : "text-loss"}`}>
