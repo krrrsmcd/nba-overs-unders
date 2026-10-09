@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { makePick } from "@/app/actions";
 import { Modal } from "@/components/modal";
 import { buttonClass, smallButtonClass } from "@/components/ui";
-import type { TeamSeed } from "@/db/teams";
+import { WIN_TOTAL_SOURCES, type TeamSeed } from "@/db/teams";
 
 export type TakenInfo = { side: "W" | "L"; owner: string; pickNumber: number };
 
@@ -87,7 +87,7 @@ export function DraftBoard({
                 </span>
                 <span className="mt-auto flex items-baseline gap-1 whitespace-nowrap bg-black/60 px-1.5 py-0.5 text-white">
                   <span className="font-pixel text-[7px] opacity-80">BETMGM O/U</span>
-                  <span className="text-xs font-semibold tabular-nums">{t.projectedWins}</span>
+                  <span className="text-xs font-semibold tabular-nums">{t.winTotals.betmgm}</span>
                 </span>
                 {tk && (
                   <span className="font-pixel mt-1 bg-black/80 px-1 py-0.5 text-[8px] leading-tight text-white">
@@ -112,9 +112,15 @@ export function DraftBoard({
               <p className="font-display text-2xl text-white [text-shadow:2px_2px_0_#000]">
                 {selected.city} {selected.name}
               </p>
-              <p className="font-pixel mt-1 text-[10px] text-white [text-shadow:1px_1px_0_#000]">
-                BETMGM WIN TOTAL: {selected.projectedWins}
-              </p>
+              <p className="font-pixel mt-2 text-[8px] text-white/80 [text-shadow:1px_1px_0_#000]">WIN TOTALS (O/U)</p>
+              <dl className="mt-1 inline-grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5 bg-black/60 px-2 py-1.5 text-sm text-white">
+                {WIN_TOTAL_SOURCES.map((src) => (
+                  <div key={src.book} className="contents">
+                    <dt>{src.name}</dt>
+                    <dd className="text-right font-semibold tabular-nums">{selected.winTotals[src.book]}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
             {!side ? (

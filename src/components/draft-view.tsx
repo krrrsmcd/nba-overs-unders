@@ -1,7 +1,7 @@
 import { DraftBoard, RefreshControls, type TakenInfo } from "@/components/draft-board";
 import { TeamNameForm } from "@/components/lobby-controls";
 import { Badge, Panel, SectionBar } from "@/components/ui";
-import { NBA_TEAMS, PROJECTION_SOURCE } from "@/db/teams";
+import { NBA_TEAMS, WIN_TOTAL_SOURCES } from "@/db/teams";
 import { positionForPick, roundOf, TOTAL_PICKS } from "@/lib/draft";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
 
@@ -81,11 +81,17 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
           <SectionBar>{myTurn ? "PICK A TEAM" : "TEAM BOARD"}</SectionBar>
           <DraftBoard leagueId={league.id} teams={NBA_TEAMS} taken={taken} myTurn={myTurn} />
           <p className="mt-3 text-xs text-ink-dim">
-            Preseason win totals (over/under) from{" "}
-            <a href={PROJECTION_SOURCE.url} target="_blank" rel="noreferrer" className="underline hover:text-ink">
-              {PROJECTION_SOURCE.label}
-            </a>
-            .
+            Win totals (over/under):{" "}
+            {WIN_TOTAL_SOURCES.map((src, i) => (
+              <span key={src.book}>
+                {i > 0 && " · "}
+                <a href={src.url} target="_blank" rel="noreferrer" className="underline hover:text-ink">
+                  {src.name}
+                </a>{" "}
+                ({src.asOf})
+              </span>
+            ))}
+            . Cards show BetMGM; all three appear when you make a pick.
           </p>
         </section>
       )}
