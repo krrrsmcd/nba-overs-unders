@@ -33,7 +33,7 @@ export const leagues = pgTable(
   (t) => [check("leagues_size_check", sql`${t.size} in (2, 3, 5)`)],
 );
 
-/** A player slot in a league. Access is by private link; only the token hash is stored. */
+/** A player slot in a league. Access is by private link (`/p/<token>`). */
 export const players = pgTable(
   "players",
   {
@@ -42,7 +42,8 @@ export const players = pgTable(
       .notNull()
       .references(() => leagues.id, { onDelete: "cascade" }),
     teamName: text("team_name"),
-    tokenHash: text("token_hash").notNull().unique(),
+    // Random private-link token. Stored so the commissioner can re-copy invite links.
+    token: text("token").notNull().unique(),
     isCommissioner: boolean("is_commissioner").notNull().default(false),
     draftPosition: integer("draft_position"),
     firstSeenAt: ts("first_seen_at"),

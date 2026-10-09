@@ -1,5 +1,5 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
 
 function createDb() {
@@ -7,15 +7,19 @@ function createDb() {
   if (!url) {
     throw new Error("DATABASE_URL is not set. Attach the Neon database in Vercel (see README).");
   }
-  return drizzle(neon(url), { schema });
+  const local = /localhost|127\.0\.0\.1/.test(url);
+  // Small pool: serverless functions handle one request at a time.
+  const pool = new Pool({ connectionString: url, max: 3, ...(local ? { ssl: false } : {}) });
+  return drizzle(pool, { schema });
 }
 
-let _db: ReturnType<typeof createDb> | undefined;
+type Db = ReturnType<typeof createDb>;
+const globalForDb = globalThis as unknown as { __db?: Db };
 
-/** Lazily created so builds without a database still succeed. */
-export function getDb() {
-  _db ??= createDb();
-  return _db;
+/** Lazily created (so builds without a database still succeed) and reused across requests. */
+export function getDb(): Db {
+  globalForDb.__db ??= createDb();
+  return globalForDb.__db;
 }
 
 export { schema };
