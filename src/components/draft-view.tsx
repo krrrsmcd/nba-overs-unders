@@ -1,4 +1,5 @@
 import { DraftBoard, RefreshControls, type TakenInfo } from "@/components/draft-board";
+import { PickAnnouncer, SoundToggle } from "@/components/pick-sound";
 import { TeamNameForm } from "@/components/lobby-controls";
 import { Badge, Panel, SectionBar } from "@/components/ui";
 import { NBA_TEAMS, WIN_TOTAL_SOURCES } from "@/db/teams";
@@ -47,11 +48,14 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
           className={`pixel-border flex flex-col gap-3 p-4 ${myTurn ? "bg-yellow text-bg" : "bg-panel"}`}
           aria-live="polite"
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-pixel text-[10px]">
               ROUND {roundOf(n, league.size) + 1} · PICK {n + 1} OF {TOTAL_PICKS}
             </p>
-            <RefreshControls />
+            <span className="flex gap-2">
+              <SoundToggle />
+              <RefreshControls />
+            </span>
           </div>
           {myTurn ? (
             <p className="font-display blink text-3xl leading-none sm:text-4xl">YOUR PICK!</p>
@@ -81,10 +85,17 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
         </Panel>
       )}
 
+      <PickAnnouncer
+        leagueId={league.id}
+        pickNumber={picks.at(-1)?.pickNumber ?? 0}
+        teamId={picks.at(-1)?.nbaTeamId ?? ""}
+        side={picks.at(-1)?.side ?? "W"}
+      />
+
       {drafting && (
         <section>
           <SectionBar>{myTurn ? "PICK A TEAM" : "TEAM BOARD"}</SectionBar>
-          <DraftBoard leagueId={league.id} teams={BOARD_TEAMS} taken={taken} myTurn={myTurn} />
+          <DraftBoard leagueId={league.id} teams={BOARD_TEAMS} taken={taken} myTurn={myTurn} nextPickNumber={n + 1} />
           <p className="mt-3 text-xs text-ink-dim">
             Win totals (over/under):{" "}
             {WIN_TOTAL_SOURCES.map((src, i) => (

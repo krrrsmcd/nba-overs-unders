@@ -20,7 +20,7 @@ export const buttonClass =
   "hover:bg-[#fff27a] disabled:cursor-not-allowed disabled:border-ink-dim disabled:bg-panel-2 disabled:text-ink-dim disabled:shadow-none";
 
 export const smallButtonClass =
-  "font-pixel inline-flex items-center justify-center border-2 border-ink bg-panel-2 px-3 py-2 text-[10px] text-ink " +
+  "font-pixel inline-flex items-center justify-center whitespace-nowrap border-2 border-ink bg-panel-2 px-3 py-2 text-[10px] text-ink " +
   "shadow-[2px_2px_0_0_#000] hover:bg-[#2b2b5a] active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-50";
 
 export const inputClass =

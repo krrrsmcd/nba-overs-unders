@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { makePick } from "@/app/actions";
 import { Modal } from "@/components/modal";
+import { markPickHeard, playPickSound } from "@/components/pick-sound";
 import { buttonClass, smallButtonClass } from "@/components/ui";
 import { WIN_TOTAL_SOURCES, type TeamSeed } from "@/db/teams";
 
@@ -35,11 +36,13 @@ export function DraftBoard({
   teams,
   taken,
   myTurn,
+  nextPickNumber,
 }: {
   leagueId: string;
   teams: TeamSeed[];
   taken: Record<string, TakenInfo>;
   myTurn: boolean;
+  nextPickNumber: number;
 }) {
   const [selected, setSelected] = useState<TeamSeed | null>(null);
   const [side, setSide] = useState<"W" | "L" | null>(null);
@@ -169,8 +172,13 @@ export function DraftBoard({
                     disabled={pending}
                     onClick={() =>
                       start(async () => {
+                        // Start the clip inside the click so browsers allow it; stop it if the pick fails.
+                        const audio = playPickSound(selected.id, side);
+                        markPickHeard(leagueId, nextPickNumber);
                         const res = await makePick(leagueId, selected.id, side);
                         if (res?.error) {
+                          audio?.pause();
+                          markPickHeard(leagueId, nextPickNumber - 1);
                           setError(res.error);
                           return;
                         }
