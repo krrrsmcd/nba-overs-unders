@@ -23,7 +23,7 @@ async function main() {
 
   await db
     .insert(nbaTeams)
-    .values(NBA_TEAMS)
+    .values(NBA_TEAMS.map(({ id, city, name, conference, primaryColor, secondaryColor }) => ({ id, city, name, conference, primaryColor, secondaryColor })))
     .onConflictDoUpdate({
       target: nbaTeams.id,
       set: {
