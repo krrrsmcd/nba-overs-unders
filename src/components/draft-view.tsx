@@ -7,6 +7,11 @@ import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/li
 
 const TEAM_BY_ID = new Map(NBA_TEAMS.map((t) => [t.id, t]));
 
+/** Draft board order: BetMGM win total, highest first; ties alphabetical. */
+const BOARD_TEAMS = [...NBA_TEAMS].sort(
+  (a, b) => b.winTotals.betmgm - a.winTotals.betmgm || a.id.localeCompare(b.id),
+);
+
 /** The draft room (status `drafting`) and the final rosters (status `complete`). */
 export async function DraftView({ league, me }: { league: League; me: Player }) {
   const [players, picks] = await Promise.all([getLeaguePlayers(league.id), getLeaguePicks(league.id)]);
@@ -79,7 +84,7 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
       {drafting && (
         <section>
           <SectionBar>{myTurn ? "PICK A TEAM" : "TEAM BOARD"}</SectionBar>
-          <DraftBoard leagueId={league.id} teams={NBA_TEAMS} taken={taken} myTurn={myTurn} />
+          <DraftBoard leagueId={league.id} teams={BOARD_TEAMS} taken={taken} myTurn={myTurn} />
           <p className="mt-3 text-xs text-ink-dim">
             Win totals (over/under):{" "}
             {WIN_TOTAL_SOURCES.map((src, i) => (
