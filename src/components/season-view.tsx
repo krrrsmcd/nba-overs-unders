@@ -159,9 +159,6 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
             </li>
           ))}
         </ol>
-        <p className="mt-3 text-xs text-ink-dim">
-          Tap a team to see its picks. PICK: W = scores wins, L = scores losses. PROJ = projected final points, blending the BetMGM preseason win total with each team&apos;s current pace. Regular-season games only.
-        </p>
       </section>
 
       {race.dates.length > 0 && (
