@@ -165,16 +165,14 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
         </p>
       </section>
 
-      <section>
-        <SectionBar>THE RACE</SectionBar>
-        <Panel>
-          {race.dates.length > 0 ? (
+      {race.dates.length > 0 && (
+        <section>
+          <SectionBar>THE RACE</SectionBar>
+          <Panel>
             <RaceChart dates={race.dates} lines={raceLines} />
-          ) : (
-            <p className="text-sm text-ink-dim">The race chart starts after the first night of games.</p>
-          )}
-        </Panel>
-      </section>
+          </Panel>
+        </section>
+      )}
 
       <section>
         <SectionBar color="cyan">YOUR TEAM</SectionBar>
