@@ -1,0 +1,180 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { makePick } from "@/app/actions";
+import { Modal } from "@/components/modal";
+import { buttonClass, smallButtonClass } from "@/components/ui";
+import type { TeamSeed } from "@/db/teams";
+
+export type TakenInfo = { side: "W" | "L"; owner: string; pickNumber: number };
+
+/** Refreshes server data when the tab regains focus, plus a manual button. */
+export function RefreshControls() {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  useEffect(() => {
+    const onFocus = () => start(() => router.refresh());
+    const onVisible = () => document.visibilityState === "visible" && onFocus();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [router]);
+  return (
+    <button type="button" className={smallButtonClass} disabled={pending} onClick={() => start(() => router.refresh())}>
+      {pending ? "…" : "↻ REFRESH"}
+    </button>
+  );
+}
+
+export function DraftBoard({
+  leagueId,
+  teams,
+  taken,
+  myTurn,
+}: {
+  leagueId: string;
+  teams: TeamSeed[];
+  taken: Record<string, TakenInfo>;
+  myTurn: boolean;
+}) {
+  const [selected, setSelected] = useState<TeamSeed | null>(null);
+  const [side, setSide] = useState<"W" | "L" | null>(null);
+  const [error, setError] = useState<string>();
+  const [stamp, setStamp] = useState<string>();
+  const [pending, start] = useTransition();
+
+  function close() {
+    setSelected(null);
+    setSide(null);
+    setError(undefined);
+  }
+
+  return (
+    <>
+      {stamp && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+          <p className="font-display stamp -rotate-6 border-8 border-yellow bg-bg/90 px-6 py-4 text-4xl text-yellow shadow-[6px_6px_0_0_#000] sm:text-6xl">
+            LOCKED IN!
+          </p>
+        </div>
+      )}
+
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+        {teams.map((t) => {
+          const tk = taken[t.id];
+          const canPick = myTurn && !tk;
+          return (
+            <li key={t.id}>
+              <button
+                type="button"
+                disabled={!canPick}
+                onClick={() => setSelected(t)}
+                aria-label={tk ? `${t.city} ${t.name}, taken by ${tk.owner}` : `${t.city} ${t.name}`}
+                className={`pixel-border relative flex h-full w-full flex-col items-start gap-1 p-3 text-left ${
+                  tk ? "opacity-35 grayscale" : canPick ? "hover:-translate-y-0.5 hover:border-yellow" : ""
+                } disabled:cursor-default`}
+                style={{
+                  background: `linear-gradient(135deg, ${t.primaryColor} 0%, ${t.primaryColor} 72%, ${t.secondaryColor} 72%)`,
+                }}
+              >
+                <span className="font-pixel text-sm text-white [text-shadow:2px_2px_0_#000]">{t.id}</span>
+                <span className="text-xs font-medium text-white [text-shadow:1px_1px_0_#000]">
+                  {t.city} {t.name}
+                </span>
+                {tk && (
+                  <span className="font-pixel mt-1 bg-black/80 px-1 py-0.5 text-[8px] leading-tight text-white">
+                    #{tk.pickNumber} {tk.owner} · {tk.side === "W" ? "WINS" : "LOSSES"}
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {selected && (
+        <Modal title={side ? "CONFIRM PICK" : "PICK A SIDE"} onClose={close} locked={pending}>
+          <div className="flex flex-col gap-4">
+            <div
+              className="pixel-border p-3"
+              style={{
+                background: `linear-gradient(135deg, ${selected.primaryColor} 0%, ${selected.primaryColor} 72%, ${selected.secondaryColor} 72%)`,
+              }}
+            >
+              <p className="font-display text-2xl text-white [text-shadow:2px_2px_0_#000]">
+                {selected.city} {selected.name}
+              </p>
+            </div>
+
+            {!side ? (
+              <>
+                <p className="text-sm text-ink-dim">Score a point for every…</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSide("W")}
+                    className="font-display border-4 border-win bg-bg py-4 text-2xl text-win shadow-[4px_4px_0_0_#000] hover:bg-win hover:text-bg"
+                  >
+                    WINS
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSide("L")}
+                    className="font-display border-4 border-loss bg-bg py-4 text-2xl text-loss shadow-[4px_4px_0_0_#000] hover:bg-loss hover:text-bg"
+                  >
+                    LOSSES
+                  </button>
+                </div>
+                <div className="flex justify-end">
+                  <button type="button" className={smallButtonClass} onClick={close}>
+                    CANCEL
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>
+                  Draft the {selected.city} {selected.name} for{" "}
+                  <span className={`font-semibold ${side === "W" ? "text-win" : "text-loss"}`}>
+                    {side === "W" ? "WINS" : "LOSSES"}
+                  </span>
+                  ?
+                </p>
+                <p className="font-pixel text-[10px] text-magenta">THIS IS FINAL.</p>
+                {error && <p className="font-pixel text-[10px] leading-relaxed text-magenta">{error}</p>}
+                <div className="flex flex-wrap justify-end gap-3">
+                  <button type="button" className={smallButtonClass} disabled={pending} onClick={() => setSide(null)}>
+                    BACK
+                  </button>
+                  <button
+                    type="button"
+                    className={buttonClass}
+                    disabled={pending}
+                    onClick={() =>
+                      start(async () => {
+                        const res = await makePick(leagueId, selected.id, side);
+                        if (res?.error) {
+                          setError(res.error);
+                          return;
+                        }
+                        close();
+                        setStamp(selected.id);
+                        setTimeout(() => setStamp(undefined), 1400);
+                      })
+                    }
+                  >
+                    {pending ? "LOCKING…" : "▶ LOCK IT IN"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
+      )}
+    </>
+  );
+}

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { SignInButton } from "@/components/auth-buttons";
+import { DraftView } from "@/components/draft-view";
 import { CopyButton, RegenerateInviteButton, TeamNameForm } from "@/components/lobby-controls";
 import { PageShell } from "@/components/page-shell";
+import { StartDraftButton } from "@/components/start-draft";
 import { Badge, buttonClass, Panel, SectionBar } from "@/components/ui";
 import { getLeaguePlayers, getMembership, getOrigin, getSessionUser, type Player } from "@/lib/session";
 
@@ -41,6 +43,8 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
   }
 
   const { league, player } = me;
+  if (league.status !== "setup") return <DraftView league={league} me={player} />;
+
   const [players, origin] = await Promise.all([getLeaguePlayers(league.id), getOrigin()]);
   const openSlots = league.size - players.length;
   const isCommish = player.isCommissioner;
@@ -50,7 +54,7 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
     <>
       <header className="flex flex-col gap-2">
         <p className="font-pixel text-[10px] text-cyan">
-          {league.size}-PLAYER LEAGUE · {league.status === "setup" ? "LOBBY" : league.status.toUpperCase()}
+          {league.size}-PLAYER LEAGUE · LOBBY
         </p>
         <h1 className="arcade-title text-4xl leading-tight sm:text-5xl">{league.name}</h1>
       </header>
@@ -97,14 +101,21 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
         {league.status === "setup" &&
           (isCommish ? (
             <>
-              <button type="button" disabled className={buttonClass}>
-                ▶ START DRAFT
-              </button>
-              <p className="font-pixel text-[10px] leading-relaxed text-ink-dim">
-                {openSlots > 0
-                  ? `WAITING ON ${openSlots} MORE ${openSlots === 1 ? "PLAYER" : "PLAYERS"} TO JOIN`
-                  : "DRAFT ROOM OPENS IN THE NEXT UPDATE"}
-              </p>
+              {openSlots > 0 ? (
+                <>
+                  <button type="button" disabled className={buttonClass}>
+                    ▶ START DRAFT
+                  </button>
+                  <p className="font-pixel text-[10px] leading-relaxed text-ink-dim">
+                    WAITING ON {openSlots} MORE {openSlots === 1 ? "PLAYER" : "PLAYERS"} TO JOIN
+                  </p>
+                </>
+              ) : (
+                <StartDraftButton
+                  leagueId={league.id}
+                  players={players.map((p) => ({ id: p.id, teamName: p.teamName ?? "Unnamed" }))}
+                />
+              )}
             </>
           ) : (
             <p className="font-pixel blink text-[10px] leading-relaxed text-yellow">

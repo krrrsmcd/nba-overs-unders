@@ -109,3 +109,27 @@ body::after {
     animation: none;
   }
 }
+
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.2) rotate(-6deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.95) rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+@utility stamp {
+  animation: stamp-in 260ms steps(4, end) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: none;
+  }
+}

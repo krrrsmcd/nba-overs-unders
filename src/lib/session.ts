@@ -6,6 +6,7 @@ import { getDb, schema } from "@/db";
 import { auth } from "@/lib/auth";
 
 export type Player = typeof schema.players.$inferSelect;
+export type Pick = typeof schema.picks.$inferSelect;
 export type League = typeof schema.leagues.$inferSelect;
 export type SessionUser = { id: string; name: string; email: string; image?: string | null };
 
@@ -47,6 +48,15 @@ export async function getLeaguePlayers(leagueId: string): Promise<Player[]> {
     .from(schema.players)
     .where(eq(schema.players.leagueId, leagueId))
     .orderBy(asc(schema.players.createdAt), asc(schema.players.id));
+}
+
+/** Picks in draft order. */
+export async function getLeaguePicks(leagueId: string): Promise<Pick[]> {
+  return getDb()
+    .select()
+    .from(schema.picks)
+    .where(eq(schema.picks.leagueId, leagueId))
+    .orderBy(asc(schema.picks.pickNumber));
 }
 
 export async function getLeagueByInviteCode(code: string): Promise<League | null> {
