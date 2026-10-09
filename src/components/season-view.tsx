@@ -5,7 +5,10 @@ import { TeamNameForm } from "@/components/lobby-controls";
 import { Badge, Panel, SectionBar } from "@/components/ui";
 import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
+import { projectedPickPoints } from "@/lib/projection";
+import { raceSeries } from "@/lib/race";
 import { leaderboard, teamRecords } from "@/lib/scoring";
+import { RaceChart } from "@/components/race-chart";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
 import { getLastSyncedAt, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
 
@@ -44,7 +47,25 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
     getLastSyncedAt(),
   ]);
   const records = teamRecords(games);
-  const rows = leaderboard(players, picks, records);
+  const rows = leaderboard(players, picks, records).map((r) => {
+    const picksWithProj = r.picks.map((pk) => ({
+      ...pk,
+      projected: projectedPickPoints(pk.side, pk.record, TEAM_BY_ID.get(pk.nbaTeamId)!.winTotals.betmgm),
+    }));
+    return { ...r, picks: picksWithProj, projected: picksWithProj.reduce((sum, pk) => sum + pk.projected, 0) };
+  });
+  const byDraft = [...players].sort((a, b) => (a.draftPosition ?? 0) - (b.draftPosition ?? 0));
+  const race = raceSeries(
+    games.map((g) => ({ ...g, gameDate: String(g.gameDate) })),
+    picks,
+    byDraft.map((p) => p.id),
+  );
+  const raceLines = byDraft.map((p, i) => ({
+    id: p.id,
+    name: p.teamName ?? "Unnamed",
+    isMe: p.id === me.id,
+    values: race.series[i].values,
+  }));
   const started = games.some((g) => g.status === "final");
   const tied = (rank: number) => rows.filter((r) => r.rank === rank).length > 1;
 
@@ -85,7 +106,12 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     <span className="truncate font-display text-lg leading-tight">{r.teamName}</span>
                     {r.playerId === me.id && <Badge tone="cyan">YOU</Badge>}
                   </span>
-                  <span className="font-display text-3xl tabular-nums text-yellow">{r.points}</span>
+                  <span className="flex flex-col items-end leading-none">
+                    <span className="font-display text-3xl tabular-nums text-yellow">{r.points}</span>
+                    <span className="mt-1 text-[11px] tabular-nums text-ink-dim">
+                      <span className="font-pixel text-[7px]">PROJ</span> {Math.round(r.projected)}
+                    </span>
+                  </span>
                   <span aria-hidden className="w-3 text-center text-sm text-ink-dim">
                     <span className="group-open:hidden">▸</span>
                     <span className="hidden group-open:inline">▾</span>
@@ -97,6 +123,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     <span className="w-8 text-center">PICK</span>
                     <span className="w-12 text-right">W–L</span>
                     <span className="w-8 text-right">PTS</span>
+                    <span className="w-9 text-right">PROJ</span>
                   </li>
                   {r.picks.map((pk) => {
                     const t = TEAM_BY_ID.get(pk.nbaTeamId)!;
@@ -109,7 +136,8 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                           {t.id}
                         </span>
                         <span className="min-w-0 flex-1 truncate">
-                          {t.city} {t.name}
+                          <span className="hidden sm:inline">{t.city} </span>
+                          {t.name}
                         </span>
                         <span
                           className={`font-pixel w-8 text-center text-[10px] ${pk.side === "W" ? "text-win" : "text-loss"}`}
@@ -121,6 +149,9 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                           {pk.record.wins}–{pk.record.losses}
                         </span>
                         <span className="w-8 text-right font-semibold tabular-nums">{pk.points}</span>
+                        <span className="w-9 text-right text-xs tabular-nums text-ink-dim">
+                          {Math.round(pk.projected)}
+                        </span>
                       </li>
                     );
                   })}
@@ -130,8 +161,19 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
           ))}
         </ol>
         <p className="mt-3 text-xs text-ink-dim">
-          Tap a team to see its picks. PICK: W = scores wins, L = scores losses. Regular-season games only.
+          Tap a team to see its picks. PICK: W = scores wins, L = scores losses. PROJ = projected final points, blending the BetMGM preseason win total with each team&apos;s current pace. Regular-season games only.
         </p>
+      </section>
+
+      <section>
+        <SectionBar>THE RACE</SectionBar>
+        <Panel>
+          {race.dates.length > 0 ? (
+            <RaceChart dates={race.dates} lines={raceLines} />
+          ) : (
+            <p className="text-sm text-ink-dim">The race chart starts after the first night of games.</p>
+          )}
+        </Panel>
       </section>
 
       <section>
