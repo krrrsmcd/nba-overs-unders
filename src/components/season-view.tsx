@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
 import { RefreshControls } from "@/components/draft-board";
-import { TeamNameForm } from "@/components/lobby-controls";
+import { RenameTeamButton } from "@/components/rename-team";
 import { Badge, Panel, SectionBar } from "@/components/ui";
 import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
@@ -155,6 +155,11 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     );
                   })}
                 </ul>
+                {r.playerId === me.id && (
+                  <div className="flex justify-end px-3 pb-4 sm:px-4">
+                    <RenameTeamButton leagueId={league.id} current={me.teamName} />
+                  </div>
+                )}
               </details>
             </li>
           ))}
@@ -170,12 +175,6 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
         </section>
       )}
 
-      <section>
-        <SectionBar color="cyan">YOUR TEAM</SectionBar>
-        <Panel>
-          <TeamNameForm leagueId={league.id} current={me.teamName} />
-        </Panel>
-      </section>
     </>
   );
 }
