@@ -12,6 +12,10 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { user } from "./auth-schema";
+
+export * from "./auth-schema";
+
 const ts = (name: string) => timestamp(name, { withTimezone: true });
 
 /** A league of 2, 3 or 5 players drafting all 30 teams. */
@@ -26,6 +30,8 @@ export const leagues = pgTable(
       .notNull()
       .default("setup"),
     orderMode: text("order_mode", { enum: ["random", "custom"] }),
+    // Shared join link: /join/<inviteCode>
+    inviteCode: text("invite_code").notNull().unique(),
     season: integer("season").notNull().default(2026),
     createdAt: ts("created_at").notNull().defaultNow(),
     draftStartedAt: ts("draft_started_at"),
@@ -33,7 +39,7 @@ export const leagues = pgTable(
   (t) => [check("leagues_size_check", sql`${t.size} in (2, 3, 5)`)],
 );
 
-/** A player slot in a league. Access is by private link (`/p/<token>`). */
+/** A signed-in user's team in a league. Created when they join via the league invite link. */
 export const players = pgTable(
   "players",
   {
@@ -42,8 +48,9 @@ export const players = pgTable(
       .notNull()
       .references(() => leagues.id, { onDelete: "cascade" }),
     teamName: text("team_name"),
-    // Random private-link token. Stored so the commissioner can re-copy invite links.
-    token: text("token").notNull().unique(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
     isCommissioner: boolean("is_commissioner").notNull().default(false),
     draftPosition: integer("draft_position"),
     firstSeenAt: ts("first_seen_at"),
@@ -51,6 +58,7 @@ export const players = pgTable(
   },
   (t) => [
     unique("players_league_position_unique").on(t.leagueId, t.draftPosition),
+    unique("players_league_user_unique").on(t.leagueId, t.userId),
     index("players_league_idx").on(t.leagueId),
   ],
 );

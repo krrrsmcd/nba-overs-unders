@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { SignInButton, SignOutButton } from "@/components/auth-buttons";
 import { CreateLeagueForm } from "@/components/create-league-form";
-import { buttonClass, Panel, SectionBar } from "@/components/ui";
+import { Badge, Panel, SectionBar } from "@/components/ui";
 import { NBA_TEAMS } from "@/db/teams";
 import { isCreationLocked } from "@/lib/season";
-import { getCurrentPlayer } from "@/lib/session";
+import { getMyLeagues, getSessionUser } from "@/lib/session";
 
-export default function Home({ searchParams }: PageProps<"/">) {
+export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center gap-10 px-4 py-12">
       <header className="flex flex-col items-center gap-4 text-center">
@@ -25,7 +26,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
 
       <section className="w-full max-w-lg">
         <Suspense fallback={<p className="font-pixel blink text-center text-sm text-yellow">LOADING…</p>}>
-          <StartPanel searchParams={searchParams} />
+          <StartPanel />
         </Suspense>
       </section>
 
@@ -52,29 +53,52 @@ export default function Home({ searchParams }: PageProps<"/">) {
   );
 }
 
-async function StartPanel({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
-  await connection(); // request-time: reads cookies and the current time
-  const [{ link }, me, locked] = await Promise.all([searchParams, getCurrentPlayer(), isCreationLocked()]);
+async function StartPanel() {
+  await connection(); // request-time: reads the session and the current time
+  const user = await getSessionUser();
+
+  if (!user) {
+    return (
+      <Panel className="flex flex-col items-center gap-4 text-center">
+        <p className="font-pixel text-[10px] leading-relaxed text-yellow blink">PRESS START</p>
+        <p className="text-ink-dim">Sign in to create a league or get back to yours.</p>
+        <SignInButton />
+      </Panel>
+    );
+  }
+
+  const [leagues, locked] = await Promise.all([getMyLeagues(user.id), isCreationLocked()]);
 
   return (
-    <div className="flex flex-col gap-6">
-      {link === "invalid" && (
-        <Panel className="border-magenta">
-          <p className="font-pixel text-[10px] leading-relaxed text-magenta">
-            THAT LINK DOESN&apos;T WORK. ASK YOUR COMMISSIONER FOR A NEW ONE.
-          </p>
-        </Panel>
-      )}
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between gap-3">
+        <p className="truncate text-sm text-ink-dim">
+          Signed in as <span className="text-ink">{user.email}</span>
+        </p>
+        <SignOutButton />
+      </div>
 
-      {me && (
-        <Panel className="flex flex-col items-center gap-3 text-center">
-          <p className="font-pixel text-[10px] text-cyan">WELCOME BACK</p>
-          <p className="font-display text-2xl">{me.player.teamName ?? "Unnamed team"}</p>
-          <p className="text-sm text-ink-dim">{me.league.name}</p>
-          <Link href="/league" className={buttonClass}>
-            ▶ CONTINUE
-          </Link>
-        </Panel>
+      {leagues.length > 0 && (
+        <div>
+          <SectionBar color="yellow">YOUR LEAGUES</SectionBar>
+          <ul className="flex flex-col gap-3">
+            {leagues.map(({ league, player }) => (
+              <li key={league.id}>
+                <Link
+                  href={`/league/${league.id}`}
+                  className="pixel-border flex items-center gap-3 bg-panel p-4 hover:bg-panel-2"
+                >
+                  <span className="flex flex-1 flex-col">
+                    <span className="font-display text-lg leading-tight">{league.name}</span>
+                    <span className="text-sm text-ink-dim">{player.teamName}</span>
+                  </span>
+                  {player.isCommissioner && <Badge tone="yellow">COMMISH</Badge>}
+                  <span className="font-pixel text-xs text-yellow">▶</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {locked ? (
