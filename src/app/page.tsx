@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { SignInButton, SignOutButton } from "@/components/auth-buttons";
 import { CreateLeagueForm } from "@/components/create-league-form";
 import { Badge, Panel, SectionBar } from "@/components/ui";
-import { NBA_TEAMS } from "@/db/teams";
 import { isCreationLocked } from "@/lib/season";
 import { getMyLeagues, getSessionUser } from "@/lib/session";
 
@@ -28,26 +27,6 @@ export default function Home() {
         <Suspense fallback={<p className="font-pixel blink text-center text-sm text-yellow">LOADING…</p>}>
           <StartPanel />
         </Suspense>
-      </section>
-
-      <section className="w-full">
-        <SectionBar>TEAM SELECT</SectionBar>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-          {NBA_TEAMS.map((t) => (
-            <li
-              key={t.id}
-              className="pixel-border flex flex-col gap-1 p-3"
-              style={{
-                background: `linear-gradient(135deg, ${t.primaryColor} 0%, ${t.primaryColor} 72%, ${t.secondaryColor} 72%)`,
-              }}
-            >
-              <span className="font-pixel text-sm text-white [text-shadow:2px_2px_0_#000]">{t.id}</span>
-              <span className="text-xs font-medium text-white [text-shadow:1px_1px_0_#000]">
-                {t.city} {t.name}
-              </span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <footer className="flex gap-6 text-xs text-ink-dim">
