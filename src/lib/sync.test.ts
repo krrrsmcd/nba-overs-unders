@@ -30,3 +30,18 @@ describe("dates", () => {
     expect(addDays("2026-11-01", -1)).toBe("2026-10-31");
   });
 });
+
+describe("gameStatus", async () => {
+  const { gameStatus } = await import("./balldontlie");
+  const g = (status: string, status_state?: string) =>
+    ({ status, status_state }) as Parameters<typeof gameStatus>[0];
+  it("maps balldontlie lifecycle states", () => {
+    expect(gameStatus(g("Final", "final"))).toBe("final");
+    expect(gameStatus(g("Final"))).toBe("final");
+    expect(gameStatus(g("3rd Qtr", "in_progress"))).toBe("in_progress");
+    expect(gameStatus(g("7:00 pm ET", "scheduled"))).toBe("scheduled");
+    expect(gameStatus(g("Postponed", "postponed"))).toBe("postponed");
+    expect(gameStatus(g("Canceled", "canceled"))).toBe("postponed");
+    expect(gameStatus(g("Delayed", "delayed"))).toBe("in_progress");
+  });
+});

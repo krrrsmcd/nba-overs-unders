@@ -50,10 +50,12 @@ export async function fetchGamesPage(opts: {
   return { games: body.data, nextCursor: body.meta?.next_cursor ?? undefined };
 }
 
-/** Our lifecycle status for a balldontlie game. */
-export function gameStatus(g: BdlGame): "scheduled" | "in_progress" | "final" {
+/** Our lifecycle status for a balldontlie game. "postponed" covers postponed, canceled and abandoned games. */
+export function gameStatus(g: BdlGame): "scheduled" | "in_progress" | "final" | "postponed" {
   const state = g.status_state?.toLowerCase();
   if (state === "final" || g.status === "Final") return "final";
-  if (state === "in_progress" || /qtr|half|ot/i.test(g.status)) return "in_progress";
+  if (state === "postponed" || state === "canceled" || state === "cancelled" || state === "abandoned") return "postponed";
+  if (state === "in_progress" || state === "delayed" || state === "suspended" || /qtr|half|ot/i.test(g.status))
+    return "in_progress";
   return "scheduled";
 }

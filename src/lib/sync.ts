@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gte, isNull, lt, lte, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, isNull, lt, lte, notInArray, or, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
 import { fetchGamesPage, gameStatus, RateLimitedError, type BdlGame } from "@/lib/balldontlie";
@@ -12,6 +12,7 @@ const FRESH_MS = 10 * 60 * 1000; // sync at most every 10 minutes
 const LOCK_MS = 30 * 1000;
 const CHUNK_DAYS = 7; // ~50 games: one 100-per-page request
 const MAX_REQUESTS = 4; // stay under the free tier's 5 requests/minute
+const STUCK_DAYS = 3; // a game still unfinished this long after its date is treated as settled
 
 const TEAM_IDS = new Set(NBA_TEAMS.map((t) => t.id));
 
@@ -43,6 +44,7 @@ function currentTime(): Date {
 }
 
 const minDate = (...ds: string[]) => ds.reduce((a, b) => (a < b ? a : b));
+const maxDate = (...ds: string[]) => ds.reduce((a, b) => (a > b ? a : b));
 
 async function upsertGames(games: BdlGame[]) {
   const rows = games
@@ -152,9 +154,11 @@ export async function syncScores(now = currentTime()): Promise<"fresh" | "locked
         .from(schema.games)
         .where(
           and(
-            gte(schema.games.gameDate, windowStart),
+            // Ignore games that will never finish (postponed/canceled) and anything stuck
+            // unfinished for 3+ days, so one odd game can't freeze score updates.
+            gte(schema.games.gameDate, maxDate(windowStart, addDays(today, -STUCK_DAYS))),
             lte(schema.games.gameDate, fetchedThrough),
-            ne(schema.games.status, "final"),
+            notInArray(schema.games.status, ["final", "postponed"]),
           ),
         );
       const settled = minDate(fetchedThrough, yesterday, pending?.d ? addDays(pending.d, -1) : fetchedThrough);

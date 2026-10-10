@@ -10,6 +10,18 @@ import { WIN_TOTAL_SOURCES, type TeamSeed } from "@/db/teams";
 
 export type TakenInfo = { side: "W" | "L"; owner: string; pickNumber: number };
 
+/** Re-fetches the page every `everyMs` while the tab is visible (e.g. waiting for another player's pick). */
+export function AutoRefresh({ everyMs = 20_000 }: { everyMs?: number }) {
+  const router = useRouter();
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, everyMs);
+    return () => clearInterval(id);
+  }, [router, everyMs]);
+  return null;
+}
+
 /** Refreshes server data when the tab regains focus, plus a manual button. */
 export function RefreshControls() {
   const router = useRouter();

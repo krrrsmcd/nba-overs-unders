@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SignInButton } from "@/components/auth-buttons";
+import { AutoRefresh } from "@/components/draft-board";
 import { DraftView } from "@/components/draft-view";
 import { SeasonView } from "@/components/season-view";
 import { CopyButton, RegenerateInviteButton, TeamNameForm } from "@/components/lobby-controls";
@@ -98,6 +99,9 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
           </Panel>
         </section>
       )}
+
+      {/* Pick up new joins and the draft starting without a manual reload. */}
+      <AutoRefresh everyMs={30_000} />
 
       <section className="flex flex-col items-center gap-3 text-center">
         {league.status === "setup" &&

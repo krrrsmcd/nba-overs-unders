@@ -1,4 +1,4 @@
-import { DraftBoard, RefreshControls, type TakenInfo } from "@/components/draft-board";
+import { AutoRefresh, DraftBoard, RefreshControls, type TakenInfo } from "@/components/draft-board";
 import { PickAnnouncer, SoundToggle } from "@/components/pick-sound";
 import { TeamNameForm } from "@/components/lobby-controls";
 import { Badge, Panel, SectionBar } from "@/components/ui";
@@ -84,6 +84,8 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
           </p>
         </Panel>
       )}
+
+      {drafting && !myTurn && <AutoRefresh everyMs={20_000} />}
 
       <PickAnnouncer
         leagueId={league.id}

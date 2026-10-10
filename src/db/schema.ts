@@ -114,7 +114,7 @@ export const games = pgTable(
       .references(() => nbaTeams.id),
     homeScore: integer("home_score").notNull().default(0),
     awayScore: integer("away_score").notNull().default(0),
-    status: text("status", { enum: ["scheduled", "in_progress", "final"] }).notNull(),
+    status: text("status", { enum: ["scheduled", "in_progress", "final", "postponed"] }).notNull(),
     postseason: boolean("postseason").notNull().default(false),
     // Only regular-season games count (excludes play-in, playoffs, NBA Cup final).
     counts: boolean("counts").notNull().default(true),

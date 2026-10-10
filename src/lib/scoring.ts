@@ -5,7 +5,7 @@ export type ScoredGame = {
   awayTeamId: string;
   homeScore: number;
   awayScore: number;
-  status: "scheduled" | "in_progress" | "final";
+  status: "scheduled" | "in_progress" | "final" | "postponed";
   counts: boolean;
 };
 
