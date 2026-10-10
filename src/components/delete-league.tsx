@@ -42,7 +42,6 @@ export function DeleteLeagueButton({ leagueId, leagueName }: { leagueId: string;
               <input
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
-                placeholder={leagueName}
                 autoFocus
                 className={inputClass}
               />

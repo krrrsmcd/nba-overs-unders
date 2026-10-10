@@ -18,7 +18,7 @@ export function TeamNameForm({ leagueId, current }: { leagueId: string; current:
           required
           maxLength={24}
           defaultValue={current ?? ""}
-          placeholder="Name your team"
+         
           className={inputClass}
         />
         {state?.error && <span className="font-pixel text-[10px] leading-relaxed text-magenta">{state.error}</span>}
@@ -37,7 +37,7 @@ export function JoinForm({ code }: { code: string }) {
     <form action={action} className="flex flex-col gap-4">
       <label className="flex flex-col gap-2">
         <span className="font-pixel text-[10px] text-cyan">NAME YOUR TEAM</span>
-        <input name="teamName" required maxLength={24} placeholder="Buzzer Beaters" className={inputClass} />
+        <input name="teamName" required maxLength={24} className={inputClass} />
       </label>
       {state?.error && (
         <p role="alert" className="font-pixel text-[10px] leading-relaxed text-magenta">

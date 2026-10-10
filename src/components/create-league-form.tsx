@@ -18,12 +18,12 @@ export function CreateLeagueForm() {
     <form action={action} className="flex flex-col gap-5">
       <label className="flex flex-col gap-2">
         <span className="font-pixel text-[10px] text-cyan">LEAGUE NAME</span>
-        <input name="leagueName" required maxLength={40} placeholder="Tuesday Night Hoops" className={inputClass} />
+        <input name="leagueName" required maxLength={40} className={inputClass} />
       </label>
 
       <label className="flex flex-col gap-2">
         <span className="font-pixel text-[10px] text-cyan">YOUR TEAM NAME</span>
-        <input name="teamName" required maxLength={24} placeholder="Buzzer Beaters" className={inputClass} />
+        <input name="teamName" required maxLength={24} className={inputClass} />
       </label>
 
       <fieldset className="flex flex-col gap-2">
