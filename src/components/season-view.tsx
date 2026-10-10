@@ -167,19 +167,22 @@ export function SeasonBoard({
         <ol className="flex flex-col gap-3">
           {rows.map((r) => (
             <li key={r.playerId}>
-              <details
-                className="pixel-border group border-l-8 bg-panel open:bg-panel-2"
-                style={{ borderLeftColor: colorOf.get(r.playerId) }}
-              >
+              <details className="pixel-border group bg-panel open:bg-panel-2">
                 <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
                   <span
-                    className={`font-pixel w-14 shrink-0 text-xs ${r.rank === 1 ? "text-yellow" : "text-ink-dim"}`}
+                    className="font-pixel w-14 shrink-0 text-xs text-ink-dim"
+                    style={r.rank === 1 ? { color: colorOf.get(r.playerId) } : undefined}
                   >
                     {tied(r.rank) ? "T-" : ""}
                     {ordinal(r.rank)}
                   </span>
                   <span className="flex min-w-0 flex-1 items-center gap-2">
-                    <span className="min-w-0 font-display text-lg leading-tight break-words">{r.teamName}</span>
+                    <span
+                      className="min-w-0 font-display text-lg leading-tight break-words"
+                      style={{ color: colorOf.get(r.playerId) }}
+                    >
+                      {r.teamName}
+                    </span>
                     {r.playerId === me.id && <Badge tone="cyan">YOU</Badge>}
                     {r.hot > 0 && !over && (
                       <span className="flex items-center gap-0.5 text-xs text-orange" title={`${r.hot} pick(s) on a hot streak`}>
