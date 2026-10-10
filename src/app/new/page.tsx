@@ -8,7 +8,7 @@ import { getSessionUser } from "@/lib/session";
 
 export default function NewLeaguePage() {
   return (
-    <PageShell>
+    <PageShell back>
       <NewLeague />
     </PageShell>
   );

@@ -12,7 +12,7 @@ import { getLeaguePlayers, getMembership, getOrigin, getSessionUser, type Player
 
 export default function LeaguePage({ params }: PageProps<"/league/[id]">) {
   return (
-    <PageShell>
+    <PageShell back>
       <League params={params} />
     </PageShell>
   );
