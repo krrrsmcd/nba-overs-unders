@@ -9,6 +9,7 @@ import { projectedPickPoints } from "@/lib/projection";
 import { raceSeries } from "@/lib/race";
 import { leaderboard, teamRecords, type PickRow } from "@/lib/scoring";
 import { RaceChart } from "@/components/race-chart";
+import { playerColor } from "@/lib/colors";
 import { Confetti, Flame, Trophy } from "@/components/pixel-art";
 import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks, type DatedScoredGame } from "@/lib/insights";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
@@ -104,6 +105,7 @@ export function SeasonBoard({ league, me, players, picks, games, syncedLabel, to
     isMe: p.id === me.id,
     values: race.series[i].values,
   }));
+  const colorOf = new Map(byDraft.map((p, i) => [p.id, playerColor(i)]));
   const started = games.some((g) => g.status === "final");
   const over = isSeasonOver(today, REGULAR_SEASON_END, dated);
   const champions = over ? rows.filter((r) => r.rank === 1) : [];
@@ -146,24 +148,15 @@ export function SeasonBoard({ league, me, players, picks, games, syncedLabel, to
         </section>
       )}
 
-      {mover && moverName && (
-        <Panel className="flex items-center gap-3">
-          <span className="font-pixel text-[9px] leading-relaxed text-cyan">
-            BIGGEST MOVER
-            <br />
-            LAST 7 DAYS
-          </span>
-          <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{moverName}</span>
-          <span className="font-display text-2xl text-win">+{mover.gain}</span>
-        </Panel>
-      )}
-
       <section>
-        <SectionBar color="yellow">{over ? "FINAL STANDINGS" : "HIGH SCORES"}</SectionBar>
+        <SectionBar color="yellow">{over ? "FINAL STANDINGS" : "SCOREBOARD"}</SectionBar>
         <ol className="flex flex-col gap-3">
           {rows.map((r) => (
             <li key={r.playerId}>
-              <details className="pixel-border group bg-panel open:bg-panel-2">
+              <details
+                className="pixel-border group border-l-8 bg-panel open:bg-panel-2"
+                style={{ borderLeftColor: colorOf.get(r.playerId) }}
+              >
                 <summary className="flex cursor-pointer list-none items-center gap-3 p-4 [&::-webkit-details-marker]:hidden">
                   <span
                     className={`font-pixel w-14 shrink-0 text-xs ${r.rank === 1 ? "text-yellow" : "text-ink-dim"}`}
@@ -182,7 +175,9 @@ export function SeasonBoard({ league, me, players, picks, games, syncedLabel, to
                     )}
                   </span>
                   <span className="flex flex-col items-end leading-none">
-                    <span className="font-display text-3xl tabular-nums text-yellow">{r.points}</span>
+                    <span className="font-display text-3xl tabular-nums" style={{ color: colorOf.get(r.playerId) }}>
+                      {r.points}
+                    </span>
                     {!over && (
                       <span className="mt-1 text-[11px] tabular-nums text-ink-dim">
                         <span className="font-pixel text-[7px]">PROJ</span> {Math.round(r.projected)}
@@ -251,9 +246,21 @@ export function SeasonBoard({ league, me, players, picks, games, syncedLabel, to
         </ol>
       </section>
 
+      {mover && moverName && (
+        <Panel className="flex items-center gap-3">
+          <span className="font-pixel text-[9px] leading-relaxed text-cyan">
+            BIGGEST MOVER
+            <br />
+            LAST 7 DAYS
+          </span>
+          <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{moverName}</span>
+          <span className="font-display text-2xl text-win">+{mover.gain}</span>
+        </Panel>
+      )}
+
       {race.dates.length > 0 && (
         <section>
-          <SectionBar>THE RACE</SectionBar>
+          <SectionBar>HISTORY</SectionBar>
           <Panel>
             <RaceChart dates={race.dates} lines={raceLines} />
           </Panel>

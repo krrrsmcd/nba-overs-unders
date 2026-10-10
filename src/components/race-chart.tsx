@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 export type RaceLine = { id: string; name: string; isMe: boolean; values: number[] };
 
-// Categorical slots validated (CVD + contrast) on the dark panel surface #15152e.
-// Assigned by draft order so a player's color never changes.
-export const SERIES_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
+import { SERIES_COLORS } from "@/lib/colors";
 
 const H = 260;
 const PAD = { top: 16, right: 92, bottom: 28, left: 36 };
