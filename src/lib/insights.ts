@@ -5,7 +5,7 @@ import type { ScoredGame } from "@/lib/scoring";
 export type DatedScoredGame = ScoredGame & { gameDate: string; tipoffAt?: Date | null };
 export type Streak = { result: "W" | "L"; length: number };
 
-export const HOT_STREAK = 4;
+export const HOT_STREAK = 3;
 
 /** Each team's current run of consecutive wins or losses (final, counting games only). */
 export function teamStreaks(games: DatedScoredGame[]): Map<string, Streak> {
