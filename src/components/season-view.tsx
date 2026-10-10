@@ -9,8 +9,10 @@ import { projectedPickPoints } from "@/lib/projection";
 import { raceSeries } from "@/lib/race";
 import { leaderboard, teamRecords } from "@/lib/scoring";
 import { RaceChart } from "@/components/race-chart";
+import { Confetti, Flame, Trophy } from "@/components/pixel-art";
+import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks } from "@/lib/insights";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
-import { getLastSyncedAt, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
+import { currentTime, easternDate, getLastSyncedAt, REGULAR_SEASON_END, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
 
 const TEAM_BY_ID = new Map(NBA_TEAMS.map((t) => [t.id, t]));
 const SYNC_WAIT_MS = 3000;
@@ -46,17 +48,25 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
     getDb().select().from(schema.games).where(eq(schema.games.counts, true)),
     getLastSyncedAt(),
   ]);
+  const dated = games.map((g) => ({ ...g, gameDate: String(g.gameDate) }));
   const records = teamRecords(games);
+  const streaks = teamStreaks(dated);
   const rows = leaderboard(players, picks, records).map((r) => {
     const picksWithProj = r.picks.map((pk) => ({
       ...pk,
       projected: projectedPickPoints(pk.side, pk.record, TEAM_BY_ID.get(pk.nbaTeamId)!.winTotals.betmgm),
+      streak: pickStreak(pk.side, streaks.get(pk.nbaTeamId)),
     }));
-    return { ...r, picks: picksWithProj, projected: picksWithProj.reduce((sum, pk) => sum + pk.projected, 0) };
+    return {
+      ...r,
+      picks: picksWithProj,
+      projected: picksWithProj.reduce((sum, pk) => sum + pk.projected, 0),
+      hot: picksWithProj.filter((pk) => pk.streak >= HOT_STREAK).length,
+    };
   });
   const byDraft = [...players].sort((a, b) => (a.draftPosition ?? 0) - (b.draftPosition ?? 0));
   const race = raceSeries(
-    games.map((g) => ({ ...g, gameDate: String(g.gameDate) })),
+    dated,
     picks,
     byDraft.map((p) => p.id),
   );
@@ -67,6 +77,10 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
     values: race.series[i].values,
   }));
   const started = games.some((g) => g.status === "final");
+  const over = isSeasonOver(easternDate(currentTime()), REGULAR_SEASON_END, dated);
+  const champions = over ? rows.filter((r) => r.rank === 1) : [];
+  const mover = started && !over ? biggestMover(recentGains(race.dates, race.series)) : null;
+  const moverName = mover && players.find((p) => p.id === mover.playerId)?.teamName;
   const tied = (rank: number) => rows.filter((r) => r.rank === rank).length > 1;
 
   return (
@@ -89,8 +103,35 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
         </Panel>
       )}
 
+      {over && champions.length > 0 && (
+        <section className="pixel-border relative flex flex-col items-center gap-3 overflow-hidden bg-panel px-4 py-8 text-center">
+          <Confetti />
+          <p className="font-pixel text-[10px] text-cyan">2026–27 REGULAR SEASON · FINAL</p>
+          <Trophy size={112} />
+          <p className="font-pixel blink text-xs text-yellow">{champions.length > 1 ? "CO-CHAMPIONS" : "CHAMPION"}</p>
+          {champions.map((c) => (
+            <p key={c.playerId} className="arcade-title text-4xl leading-tight break-words sm:text-5xl">
+              {c.teamName}
+            </p>
+          ))}
+          <p className="font-display text-2xl text-ink">{champions[0].points} POINTS</p>
+        </section>
+      )}
+
+      {mover && moverName && (
+        <Panel className="flex items-center gap-3">
+          <span className="font-pixel text-[9px] leading-relaxed text-cyan">
+            BIGGEST MOVER
+            <br />
+            LAST 7 DAYS
+          </span>
+          <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{moverName}</span>
+          <span className="font-display text-2xl text-win">+{mover.gain}</span>
+        </Panel>
+      )}
+
       <section>
-        <SectionBar color="yellow">HIGH SCORES</SectionBar>
+        <SectionBar color="yellow">{over ? "FINAL STANDINGS" : "HIGH SCORES"}</SectionBar>
         <ol className="flex flex-col gap-3">
           {rows.map((r) => (
             <li key={r.playerId}>
@@ -105,12 +146,20 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                   <span className="flex min-w-0 flex-1 items-center gap-2">
                     <span className="min-w-0 font-display text-lg leading-tight break-words">{r.teamName}</span>
                     {r.playerId === me.id && <Badge tone="cyan">YOU</Badge>}
+                    {r.hot > 0 && !over && (
+                      <span className="flex items-center gap-0.5 text-xs text-orange" title={`${r.hot} pick(s) on a hot streak`}>
+                        <Flame size={12} />
+                        <span className="font-pixel text-[9px]">{r.hot}</span>
+                      </span>
+                    )}
                   </span>
                   <span className="flex flex-col items-end leading-none">
                     <span className="font-display text-3xl tabular-nums text-yellow">{r.points}</span>
-                    <span className="mt-1 text-[11px] tabular-nums text-ink-dim">
-                      <span className="font-pixel text-[7px]">PROJ</span> {Math.round(r.projected)}
-                    </span>
+                    {!over && (
+                      <span className="mt-1 text-[11px] tabular-nums text-ink-dim">
+                        <span className="font-pixel text-[7px]">PROJ</span> {Math.round(r.projected)}
+                      </span>
+                    )}
                   </span>
                   <span aria-hidden className="w-3 text-center text-sm text-ink-dim">
                     <span className="group-open:hidden">▸</span>
@@ -123,7 +172,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     <span className="w-7 text-center">PICK</span>
                     <span className="w-10 text-right">W–L</span>
                     <span className="w-7 text-right">PTS</span>
-                    <span className="w-8 text-right">PROJ</span>
+                    {!over && <span className="w-8 text-right">PROJ</span>}
                   </li>
                   {r.picks.map((pk) => {
                     const t = TEAM_BY_ID.get(pk.nbaTeamId)!;
@@ -137,6 +186,12 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                         </span>
                         <span className="min-w-0 flex-1 break-words">
                           {t.city} {t.name}
+                          {!over && pk.streak >= HOT_STREAK && (
+                            <span className="ml-1 inline-flex items-center gap-0.5 align-middle text-orange" title={`Scored ${pk.streak} games in a row`}>
+                              <Flame size={11} />
+                              <span className="font-pixel text-[8px]">×{pk.streak}</span>
+                            </span>
+                          )}
                         </span>
                         <span
                           className={`font-pixel w-7 text-center text-[10px] ${pk.side === "W" ? "text-win" : "text-loss"}`}
@@ -148,9 +203,11 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                           {pk.record.wins}–{pk.record.losses}
                         </span>
                         <span className="w-7 text-right font-semibold tabular-nums">{pk.points}</span>
-                        <span className="w-8 text-right text-xs tabular-nums text-ink-dim">
-                          {Math.round(pk.projected)}
-                        </span>
+                        {!over && (
+                          <span className="w-8 text-right text-xs tabular-nums text-ink-dim">
+                            {Math.round(pk.projected)}
+                          </span>
+                        )}
                       </li>
                     );
                   })}

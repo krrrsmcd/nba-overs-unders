@@ -133,3 +133,28 @@ body::after {
     animation: none;
   }
 }
+
+/* Season-end confetti: chunky pixel squares falling */
+@keyframes confetti-fall {
+  from {
+    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(420px);
+  }
+}
+
+@utility confetti-bit {
+  position: absolute;
+  top: -12px;
+  width: 6px;
+  height: 6px;
+  animation: confetti-fall 3.2s steps(16) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-bit {
+    animation: none;
+    display: none;
+  }
+}

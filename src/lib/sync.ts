@@ -38,7 +38,7 @@ export function addDays(date: string, days: number): string {
 }
 
 /** The current time. SYNC_FAKE_NOW lets local tests pretend it's mid-season (never in production). */
-function currentTime(): Date {
+export function currentTime(): Date {
   const fake = process.env.VERCEL_ENV !== "production" ? process.env.SYNC_FAKE_NOW : undefined;
   return fake ? new Date(fake) : new Date();
 }
