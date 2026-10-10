@@ -18,7 +18,6 @@ export function TeamNameForm({ leagueId, current }: { leagueId: string; current:
           required
           maxLength={24}
           defaultValue={current ?? ""}
-         
           className={inputClass}
         />
         {state?.error && <span className="font-pixel text-[10px] leading-relaxed text-magenta">{state.error}</span>}
