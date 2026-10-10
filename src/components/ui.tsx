@@ -27,12 +27,28 @@ export const inputClass =
   "w-full border-4 border-ink bg-bg px-3 py-3 text-base text-ink outline-none placeholder:text-ink-dim " +
   "focus:border-cyan shadow-[inset_3px_3px_0_0_rgba(0,0,0,0.5)]";
 
-export function Badge({ children, tone = "dim" }: { children: ReactNode; tone?: "dim" | "cyan" | "yellow" | "magenta" }) {
+export function Badge({
+  children,
+  tone = "dim",
+  color,
+}: {
+  children: ReactNode;
+  tone?: "dim" | "cyan" | "yellow" | "magenta";
+  /** Custom color (e.g. a player's color); overrides tone. */
+  color?: string;
+}) {
   const cls = {
     dim: "border-ink-dim text-ink-dim",
     cyan: "border-cyan text-cyan",
     yellow: "border-yellow text-yellow",
     magenta: "border-magenta text-magenta",
   }[tone];
-  return <span className={`font-pixel border-2 px-1.5 py-0.5 text-[9px] leading-none ${cls}`}>{children}</span>;
+  return (
+    <span
+      className={`font-pixel border-2 px-1.5 py-0.5 text-[9px] leading-none ${cls}`}
+      style={color ? { color, borderColor: color } : undefined}
+    >
+      {children}
+    </span>
+  );
 }

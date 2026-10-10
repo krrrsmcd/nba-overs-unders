@@ -183,7 +183,7 @@ export function SeasonBoard({
                     >
                       {r.teamName}
                     </span>
-                    {r.playerId === me.id && <Badge tone="cyan">YOU</Badge>}
+                    {r.playerId === me.id && <Badge color={colorOf.get(r.playerId)}>YOU</Badge>}
                     {r.hot > 0 && !over && (
                       <span className="flex items-center gap-0.5 text-xs text-orange" title={`${r.hot} pick(s) on a hot streak`}>
                         <Flame size={12} />
