@@ -30,6 +30,9 @@ function subscribe(fn: () => void) {
 }
 const isMuted = () => read(MUTE_KEY) === "1";
 
+/** True when the player turned sound off (announcer and button blips). */
+export const isSoundMuted = isMuted;
+
 /** Play the announcer clip for a pick. Call from the click that makes the pick so browsers allow audio. */
 export function playPickSound(teamId: string, side: "W" | "L"): HTMLAudioElement | null {
   if (isMuted()) return null;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bungee, Press_Start_2P, Rubik } from "next/font/google";
+import { UiSounds } from "@/components/ui-sounds";
 import "./globals.css";
 
 const pixel = Press_Start_2P({
@@ -28,7 +29,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${pixel.variable} ${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <UiSounds />
+        {children}
+      </body>
     </html>
   );
 }
