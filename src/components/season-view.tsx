@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { after } from "next/server";
 import { RefreshControls } from "@/components/draft-board";
 import { RenameTeamButton } from "@/components/rename-team";
+import { CommissionerZone } from "@/components/delete-league";
 import { Badge, Panel, SectionBar } from "@/components/ui";
 import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
@@ -58,6 +59,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
       games={games.map((g) => ({ ...g, gameDate: String(g.gameDate) }))}
       syncedLabel={`Scores updated ${ago(syncedAt)}`}
       today={easternDate(currentTime())}
+      canDelete={me.isCommissioner}
     />
   );
 }
@@ -73,10 +75,22 @@ export type SeasonBoardProps = {
   today: string;
   /** Demo mode: no refresh or rename controls. */
   demo?: boolean;
+  /** Show the commissioner's delete-league control. */
+  canDelete?: boolean;
 };
 
 /** The season scoreboard itself, from already-loaded data (also used by the demo page). */
-export function SeasonBoard({ league, me, players, picks, games, syncedLabel, today, demo = false }: SeasonBoardProps) {
+export function SeasonBoard({
+  league,
+  me,
+  players,
+  picks,
+  games,
+  syncedLabel,
+  today,
+  demo = false,
+  canDelete = false,
+}: SeasonBoardProps) {
   const dated = games;
   const records = teamRecords(games);
   const streaks = teamStreaks(dated);
@@ -267,6 +281,7 @@ export function SeasonBoard({ league, me, players, picks, games, syncedLabel, to
         </section>
       )}
 
+      {canDelete && !demo && <CommissionerZone leagueId={league.id} leagueName={league.name} />}
     </>
   );
 }

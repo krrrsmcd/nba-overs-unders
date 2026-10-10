@@ -236,3 +236,16 @@ export async function makePick(leagueId: string, teamId: string, side: "W" | "L"
   refresh();
   return { ok: true };
 }
+
+/** Commissioner only: permanently delete the league, its players and picks. */
+export async function deleteLeague(leagueId: string, confirmName: string): Promise<FormState> {
+  const user = await getSessionUser();
+  const me = user && (await getMembership(leagueId, user.id));
+  if (!me?.player.isCommissioner) return { error: "Only the commissioner can delete the league." };
+  if (clean(confirmName).toLowerCase() !== me.league.name.trim().toLowerCase())
+    return { error: "Type the league name exactly to confirm." };
+
+  // Players and picks are removed by ON DELETE CASCADE.
+  await getDb().delete(schema.leagues).where(eq(schema.leagues.id, leagueId));
+  redirect("/");
+}

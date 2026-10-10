@@ -1,6 +1,7 @@
 import { AutoRefresh, DraftBoard, RefreshControls, type TakenInfo } from "@/components/draft-board";
 import { PickAnnouncer, SoundToggle } from "@/components/pick-sound";
 import { TeamNameForm } from "@/components/lobby-controls";
+import { CommissionerZone } from "@/components/delete-league";
 import { Badge, Panel, SectionBar } from "@/components/ui";
 import { NBA_TEAMS, WIN_TOTAL_SOURCES } from "@/db/teams";
 import { positionForPick, roundOf, TOTAL_PICKS } from "@/lib/draft";
@@ -187,6 +188,7 @@ export async function DraftView({ league, me }: { league: League; me: Player }) 
           <TeamNameForm leagueId={league.id} current={me.teamName} />
         </Panel>
       </section>
+      {me.isCommissioner && <CommissionerZone leagueId={league.id} leagueName={league.name} />}
     </>
   );
 }

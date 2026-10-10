@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SignInButton } from "@/components/auth-buttons";
 import { AutoRefresh } from "@/components/draft-board";
 import { DraftView } from "@/components/draft-view";
+import { CommissionerZone } from "@/components/delete-league";
 import { SeasonView } from "@/components/season-view";
 import { CopyButton, RegenerateInviteButton, TeamNameForm } from "@/components/lobby-controls";
 import { PageShell } from "@/components/page-shell";
@@ -129,6 +130,7 @@ async function League({ params }: { params: PageProps<"/league/[id]">["params"] 
             </p>
           ))}
       </section>
+      {isCommish && <CommissionerZone leagueId={league.id} leagueName={league.name} />}
     </>
   );
 }
