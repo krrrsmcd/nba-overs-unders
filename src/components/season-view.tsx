@@ -7,10 +7,10 @@ import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
 import { projectedPickPoints } from "@/lib/projection";
 import { raceSeries } from "@/lib/race";
-import { leaderboard, teamRecords } from "@/lib/scoring";
+import { leaderboard, teamRecords, type PickRow } from "@/lib/scoring";
 import { RaceChart } from "@/components/race-chart";
 import { Confetti, Flame, Trophy } from "@/components/pixel-art";
-import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks } from "@/lib/insights";
+import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks, type DatedScoredGame } from "@/lib/insights";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
 import { currentTime, easternDate, getLastSyncedAt, REGULAR_SEASON_END, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
 
@@ -48,7 +48,35 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
     getDb().select().from(schema.games).where(eq(schema.games.counts, true)),
     getLastSyncedAt(),
   ]);
-  const dated = games.map((g) => ({ ...g, gameDate: String(g.gameDate) }));
+  return (
+    <SeasonBoard
+      league={league}
+      me={me}
+      players={players}
+      picks={picks}
+      games={games.map((g) => ({ ...g, gameDate: String(g.gameDate) }))}
+      syncedLabel={`Scores updated ${ago(syncedAt)}`}
+      today={easternDate(currentTime())}
+    />
+  );
+}
+
+export type SeasonBoardProps = {
+  league: { id: string; name: string; size: number };
+  me: { id: string; teamName: string | null };
+  players: { id: string; teamName: string | null; draftPosition: number | null }[];
+  picks: PickRow[];
+  games: DatedScoredGame[];
+  syncedLabel: string;
+  /** US Eastern date the board is shown for (decides whether the season is over). */
+  today: string;
+  /** Demo mode: no refresh or rename controls. */
+  demo?: boolean;
+};
+
+/** The season scoreboard itself, from already-loaded data (also used by the demo page). */
+export function SeasonBoard({ league, me, players, picks, games, syncedLabel, today, demo = false }: SeasonBoardProps) {
+  const dated = games;
   const records = teamRecords(games);
   const streaks = teamStreaks(dated);
   const rows = leaderboard(players, picks, records).map((r) => {
@@ -77,7 +105,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
     values: race.series[i].values,
   }));
   const started = games.some((g) => g.status === "final");
-  const over = isSeasonOver(easternDate(currentTime()), REGULAR_SEASON_END, dated);
+  const over = isSeasonOver(today, REGULAR_SEASON_END, dated);
   const champions = over ? rows.filter((r) => r.rank === 1) : [];
   const mover = started && !over ? biggestMover(recentGains(race.dates, race.series)) : null;
   const moverName = mover && players.find((p) => p.id === mover.playerId)?.teamName;
@@ -91,8 +119,8 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
       </header>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-ink-dim">Scores updated {ago(syncedAt)}</p>
-        <RefreshControls />
+        <p className="text-xs text-ink-dim">{syncedLabel}</p>
+        {!demo && <RefreshControls />}
       </div>
 
       {!started && (
@@ -212,7 +240,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
                     );
                   })}
                 </ul>
-                {r.playerId === me.id && (
+                {r.playerId === me.id && !demo && (
                   <div className="flex justify-end px-3 pb-4 sm:px-4">
                     <RenameTeamButton leagueId={league.id} current={me.teamName} />
                   </div>
