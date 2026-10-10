@@ -51,6 +51,9 @@ export default function Home() {
       </section>
 
       <footer className="flex gap-6 text-xs text-ink-dim">
+        <Link href="/practice" className="hover:text-ink">
+          Practice draft
+        </Link>
         <Link href="/privacy" className="hover:text-ink">
           Privacy
         </Link>
