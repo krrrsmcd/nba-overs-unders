@@ -2,8 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { SignInButton, SignOutButton } from "@/components/auth-buttons";
-import { CreateLeagueForm } from "@/components/create-league-form";
-import { Badge, Panel, SectionBar } from "@/components/ui";
+import { Badge, buttonClass, Panel, SectionBar } from "@/components/ui";
 import { isCreationLocked } from "@/lib/season";
 import { getMyLeagues, getSessionUser } from "@/lib/session";
 
@@ -99,12 +98,9 @@ async function StartPanel() {
           </p>
         </Panel>
       ) : (
-        <div>
-          <SectionBar color="cyan">NEW LEAGUE</SectionBar>
-          <Panel>
-            <CreateLeagueForm />
-          </Panel>
-        </div>
+        <Link href="/new" className={`${buttonClass} w-full`}>
+          CREATE LEAGUE
+        </Link>
       )}
     </div>
   );
