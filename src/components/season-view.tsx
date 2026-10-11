@@ -142,7 +142,7 @@ export function SeasonBoard({
       {!started && (
         <Panel className="text-center">
           <p className="font-pixel text-[10px] leading-relaxed text-yellow">
-            SEASON TIPS OFF {new Date(`${REGULAR_SEASON_START}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}. EVERYONE STARTS AT 0.
+            SEASON TIPS OFF {new Date(`${REGULAR_SEASON_START}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase()}.
           </p>
         </Panel>
       )}
