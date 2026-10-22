@@ -165,36 +165,6 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
           </div>
         )}
       </div>
-
-      <details className="text-xs text-ink-dim">
-        <summary className="cursor-pointer">View as table</summary>
-        <div className="mt-2 max-h-64 overflow-auto">
-          <table className="w-full text-left tabular-nums">
-            <thead>
-              <tr>
-                <th className="py-1 pr-3 font-normal">Date</th>
-                {lines.map((l) => (
-                  <th key={l.id} className="py-1 pr-3 font-normal">
-                    {l.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="text-ink">
-              {[...dates.keys()].reverse().map((i) => (
-                <tr key={dates[i]}>
-                  <td className="py-0.5 pr-3 text-ink-dim">{shortDate(dates[i])}</td>
-                  {lines.map((l) => (
-                    <td key={l.id} className="py-0.5 pr-3">
-                      {l.values[i]}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
   );
 }
