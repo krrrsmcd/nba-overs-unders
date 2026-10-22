@@ -63,5 +63,15 @@ export function demoSeason(seed = 2027) {
       });
     }
   }
+  // Give one Losses pick a hot streak (its last 4 games all losses) so the demo shows a losing-streak flame.
+  const tanker = picks.find((pk) => pk.side === "L")!.nbaTeamId;
+  const theirs = games.filter((g) => g.homeTeamId === tanker || g.awayTeamId === tanker).slice(-4);
+  for (const g of theirs) {
+    const isHome = g.homeTeamId === tanker;
+    const [hi, lo] = [Math.max(g.homeScore, g.awayScore), Math.min(g.homeScore, g.awayScore)];
+    g.homeScore = isHome ? lo : hi;
+    g.awayScore = isHome ? hi : lo;
+  }
+
   return { players, picks, games };
 }
