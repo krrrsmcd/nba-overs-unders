@@ -48,3 +48,28 @@ export function soundForPick(teamId: string, side: "W" | "L", last?: string, ran
   const choices = pool.filter((s) => s !== last);
   return choices[Math.floor(random() * choices.length)];
 }
+
+/** Clips for tapping a hot-streak flame on a Wins pick (the team keeps winning). */
+export const WIN_STREAK_SOUNDS = [
+  "/sounds/streak-win/book-the-parade-fam.mp3",
+  "/sounds/streak-win/hotter-than-a-whore-in-church.mp3",
+  "/sounds/streak-win/oh-theyre-on-fire.mp3",
+  "/sounds/streak-win/too-hot-to-handle.mp3",
+  "/sounds/streak-win/turn-on-the-sprinklers.mp3",
+];
+
+/** Clips for tapping a hot-streak flame on a Losses pick (the team keeps losing). */
+export const LOSS_STREAK_SOUNDS = [
+  "/sounds/streak-loss/another-l-keep-em-coming.mp3",
+  "/sounds/streak-loss/brick-city-population-them.mp3",
+  "/sounds/streak-loss/first-apron-second-apron.mp3",
+  "/sounds/streak-loss/the-tank-is-full-baby.mp3",
+  "/sounds/streak-loss/they-cant-buy-a-bucket.mp3",
+];
+
+/** A random streak clip for the pick's side (no immediate repeats). */
+export function soundForStreak(side: "W" | "L", last?: string, random = Math.random): string {
+  const pool = side === "W" ? WIN_STREAK_SOUNDS : LOSS_STREAK_SOUNDS;
+  const choices = pool.filter((s) => s !== last);
+  return choices[Math.floor(random() * choices.length)];
+}

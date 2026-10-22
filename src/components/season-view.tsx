@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
 import { RefreshControls } from "@/components/draft-board";
+import { StreakBadge } from "@/components/streak-badge";
 import { RenameTeamButton } from "@/components/rename-team";
 import { CommissionerZone } from "@/components/delete-league";
 import { Badge, Panel, SectionBar } from "@/components/ui";
@@ -227,10 +228,7 @@ export function SeasonBoard({
                         <span className="min-w-0 flex-1 break-words">
                           {t.city} {t.name}
                           {!over && pk.streak >= HOT_STREAK && (
-                            <span className="ml-1 inline-flex items-center gap-0.5 align-middle text-orange" title={`Scored ${pk.streak} games in a row`}>
-                              <Flame size={11} />
-                              <span className="font-pixel text-[8px]">×{pk.streak}</span>
-                            </span>
+                            <StreakBadge side={pk.side} streak={pk.streak} />
                           )}
                         </span>
                         <span

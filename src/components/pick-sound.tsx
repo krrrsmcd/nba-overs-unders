@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { soundForPick } from "@/lib/sounds";
+import { soundForPick, soundForStreak } from "@/lib/sounds";
 import { smallButtonClass } from "@/components/ui";
 
 const MUTE_KEY = "ou_sound_muted";
@@ -37,6 +37,18 @@ export const isSoundMuted = isMuted;
 export function playPickSound(teamId: string, side: "W" | "L"): HTMLAudioElement | null {
   if (isMuted()) return null;
   const clip = soundForPick(teamId, side, lastClip);
+  lastClip = clip;
+  const audio = new Audio(clip);
+  audio.play().catch(() => {
+    /* autoplay blocked or file missing: stay silent */
+  });
+  return audio;
+}
+
+/** Play a random hot-streak clip for a Wins or Losses pick. Call from a tap so browsers allow audio. */
+export function playStreakSound(side: "W" | "L"): HTMLAudioElement | null {
+  if (isMuted()) return null;
+  const clip = soundForStreak(side, lastClip);
   lastClip = clip;
   const audio = new Audio(clip);
   audio.play().catch(() => {
