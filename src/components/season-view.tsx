@@ -269,7 +269,9 @@ export function SeasonBoard({
             LAST 7 DAYS
           </span>
           <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{moverName}</span>
-          <span className="font-display text-2xl text-win">+{mover.gain}</span>
+          <span className="font-display text-2xl" style={{ color: colorOf.get(mover.playerId) }}>
+            +{mover.gain}
+          </span>
         </Panel>
       )}
 
