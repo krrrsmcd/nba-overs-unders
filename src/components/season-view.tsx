@@ -263,12 +263,17 @@ export function SeasonBoard({
 
       {mover && moverName && (
         <Panel className="flex items-center gap-3">
-          <span className="font-pixel text-[9px] leading-relaxed text-cyan">
+          <span className="font-pixel text-[9px] leading-relaxed text-white">
             BIGGEST MOVER
             <br />
             LAST 7 DAYS
           </span>
-          <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words">{moverName}</span>
+          <span
+            className="min-w-0 flex-1 font-display text-lg leading-tight break-words"
+            style={{ color: colorOf.get(mover.playerId) }}
+          >
+            {moverName}
+          </span>
           <span className="font-display text-2xl" style={{ color: colorOf.get(mover.playerId) }}>
             +{mover.gain}
           </span>
