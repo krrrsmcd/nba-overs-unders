@@ -81,14 +81,21 @@ async function upsertGames(games: BdlGame[]) {
     });
 }
 
+/** A manual refresh may pull at most this often (balldontlie free tier: 5 requests/minute). */
+export const MANUAL_REFRESH_MIN_MS = 60 * 1000;
+
 /**
- * Pulls new results from balldontlie if the last sync is older than 10 minutes.
- * Safe to call on every page load: a DB lock keeps it to one sync at a time.
+ * Pulls new results from balldontlie if the last sync is older than `minAgeMs` (10 minutes for
+ * page loads; a manual refresh passes MANUAL_REFRESH_MIN_MS). Safe to call on every page load:
+ * a DB lock keeps it to one sync at a time.
  */
-export async function syncScores(now = currentTime()): Promise<"fresh" | "locked" | "synced" | "partial" | "error"> {
+export async function syncScores(
+  now = currentTime(),
+  { minAgeMs = FRESH_MS }: { minAgeMs?: number } = {},
+): Promise<"fresh" | "locked" | "synced" | "partial" | "error"> {
   const db = getDb();
   const [state] = await db.select().from(schema.syncState).where(eq(schema.syncState.id, 1));
-  if (state?.lastSyncedAt && now.getTime() - state.lastSyncedAt.getTime() < FRESH_MS) return "fresh";
+  if (state?.lastSyncedAt && now.getTime() - state.lastSyncedAt.getTime() < minAgeMs) return "fresh";
   if (!process.env.BALLDONTLIE_API_KEY) return "error";
 
   const locked = await db

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { makePick, type FormState } from "@/app/actions";
+import { makePick, refreshScores, type FormState } from "@/app/actions";
 import { Modal } from "@/components/modal";
 import { markPickHeard, playPickSound } from "@/components/pick-sound";
 import { RefreshIcon } from "@/components/pixel-art";
@@ -23,8 +23,12 @@ export function AutoRefresh({ everyMs = 20_000 }: { everyMs?: number }) {
   return null;
 }
 
-/** Refreshes server data when the tab regains focus, plus a manual button. */
-export function RefreshControls() {
+/**
+ * Refreshes server data when the tab regains focus, plus a manual button. With `pullScores`
+ * (season screen), the button first pulls the latest scores instead of waiting for the
+ * 10-minute background sync.
+ */
+export function RefreshControls({ pullScores = false }: { pullScores?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   useEffect(() => {
@@ -42,7 +46,7 @@ export function RefreshControls() {
       type="button"
       className={smallButtonClass}
       disabled={pending}
-      onClick={() => start(() => router.refresh())}
+      onClick={() => start(() => (pullScores ? refreshScores() : router.refresh()))}
       title="Refresh"
     >
       <RefreshIcon size={12} />

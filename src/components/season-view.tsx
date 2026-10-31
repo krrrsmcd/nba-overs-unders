@@ -200,7 +200,7 @@ export function SeasonBoard({
           </SectionBar>
           <div className="flex min-w-0 items-center gap-2">
             <p className="text-right text-xs text-ink-dim">{syncedLabel}</p>
-            {!demo && <RefreshControls />}
+            {!demo && <RefreshControls pullScores />}
           </div>
         </div>
         <ol className="flex flex-col gap-3">

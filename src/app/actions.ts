@@ -9,6 +9,7 @@ import { NBA_TEAMS } from "@/db/teams";
 import { isPermutationOf, positionForPick, shuffle, TOTAL_PICKS } from "@/lib/draft";
 import { isCreationLocked } from "@/lib/season";
 import { getMembership, getSessionUser, newInviteCode } from "@/lib/session";
+import { currentTime, MANUAL_REFRESH_MIN_MS, syncScores } from "@/lib/sync";
 
 export type FormState = { error?: string; ok?: boolean } | undefined;
 
@@ -123,6 +124,20 @@ export async function updateTeamName(leagueId: string, _prev: FormState, formDat
   await db.update(schema.players).set({ teamName }).where(eq(schema.players.id, me.player.id));
   refresh();
   return { ok: true };
+}
+
+/**
+ * Refresh button on the season screen: pull the latest scores now (if the last pull was over a
+ * minute ago) and re-render. Waits for the pull so the page shows the new scores.
+ */
+export async function refreshScores(): Promise<void> {
+  if (!(await getSessionUser())) return;
+  try {
+    await syncScores(currentTime(), { minAgeMs: MANUAL_REFRESH_MIN_MS });
+  } catch (err) {
+    console.error("[sync] manual refresh failed", err);
+  }
+  refresh();
 }
 
 /** Commissioner only: replace the league's invite link (the old one stops working). */
