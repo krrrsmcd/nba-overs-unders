@@ -215,18 +215,26 @@ export function SeasonBoard({
                     {tied(r.rank) ? "T-" : ""}
                     {ordinal(r.rank)}
                   </span>
-                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                  {/* Narrow screens: tags wrap onto their own line under the name. */}
+                  <span className="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-2">
                     <span
-                      className="min-w-0 font-display text-lg leading-tight break-words"
+                      className="min-w-0 max-w-full font-display text-lg leading-tight break-words"
                       style={{ color: colorOf.get(r.playerId) }}
                     >
                       {r.teamName}
                     </span>
-                    {r.playerId === me.id && <Badge color={colorOf.get(r.playerId)}>YOU</Badge>}
-                    {r.hot > 0 && !over && (
-                      <span className="flex items-center gap-0.5 text-xs text-orange" title={`${r.hot} pick(s) on a hot streak`}>
-                        <Flame size={12} />
-                        <span className="font-pixel text-[9px]">{r.hot}</span>
+                    {(r.playerId === me.id || (r.hot > 0 && !over)) && (
+                      <span className="flex items-center gap-2">
+                        {r.playerId === me.id && <Badge color={colorOf.get(r.playerId)}>YOU</Badge>}
+                        {r.hot > 0 && !over && (
+                          <span
+                            className="flex items-center gap-0.5 text-xs text-orange"
+                            title={`${r.hot} pick(s) on a hot streak`}
+                          >
+                            <Flame size={12} />
+                            <span className="font-pixel text-[9px]">{r.hot}</span>
+                          </span>
+                        )}
                       </span>
                     )}
                   </span>
