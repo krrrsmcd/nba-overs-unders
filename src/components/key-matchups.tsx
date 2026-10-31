@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { Flame } from "@/components/pixel-art";
 import { RaceChart, type RaceLine } from "@/components/race-chart";
 import { Panel } from "@/components/ui";
 import { finalOutcome } from "@/lib/matchups";
@@ -94,14 +95,26 @@ export function MatchupsHistoryPanel({
         <Panel className="flex flex-col gap-4">
           {heater && (
             <div className="flex items-center gap-3 border-b-2 border-white pb-4">
-              <span className="font-pixel text-[9px] leading-relaxed text-white">
-                BIGGEST HEATER
-                <br />
-                LAST 7 DAYS
-              </span>
-              <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words" style={{ color: heater.color }}>
-                {heater.name}
-              </span>
+              {/* Narrow screens: flame + "LAST 7 DAYS", with the name on its own line below. */}
+              <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+                <span className="font-pixel shrink-0 text-[9px] leading-relaxed text-white">
+                  <span className="flex items-center gap-1.5 sm:hidden">
+                    <Flame size={12} />
+                    LAST 7 DAYS
+                  </span>
+                  <span className="hidden sm:inline">
+                    BIGGEST HEATER
+                    <br />
+                    LAST 7 DAYS
+                  </span>
+                </span>
+                <span
+                  className="min-w-0 max-w-full font-display text-lg leading-tight break-words"
+                  style={{ color: heater.color }}
+                >
+                  {heater.name}
+                </span>
+              </div>
               <span className="font-display text-2xl" style={{ color: heater.color }}>
                 +{heater.gain}
               </span>
