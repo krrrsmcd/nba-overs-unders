@@ -170,11 +170,6 @@ export function SeasonBoard({
         <h1 className="arcade-title text-4xl leading-tight sm:text-5xl">{league.name}</h1>
       </header>
 
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-ink-dim">{syncedLabel}</p>
-        {!demo && <RefreshControls />}
-      </div>
-
       {!started && (
         <Panel className="text-center">
           <p className="font-pixel text-[10px] leading-relaxed text-yellow">
@@ -199,7 +194,15 @@ export function SeasonBoard({
       )}
 
       <section>
-        <SectionBar color="yellow">{over ? "FINAL STANDINGS" : "SCOREBOARD"}</SectionBar>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <SectionBar color="yellow" className="shrink-0">
+            {over ? "FINAL STANDINGS" : "SCOREBOARD"}
+          </SectionBar>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="text-right text-xs text-ink-dim">{syncedLabel}</p>
+            {!demo && <RefreshControls />}
+          </div>
+        </div>
         <ol className="flex flex-col gap-3">
           {rows.map((r) => (
             <li key={r.playerId}>

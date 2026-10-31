@@ -1,10 +1,19 @@
 import type { ReactNode } from "react";
 
 /** Skewed magenta header bar used to title each section. */
-export function SectionBar({ children, color = "magenta" }: { children: ReactNode; color?: "magenta" | "cyan" | "yellow" }) {
+export function SectionBar({
+  children,
+  color = "magenta",
+  className = "mb-4",
+}: {
+  children: ReactNode;
+  color?: "magenta" | "cyan" | "yellow";
+  /** Spacing and layout; defaults to the usual gap below the bar. */
+  className?: string;
+}) {
   const bg = { magenta: "bg-magenta text-white", cyan: "bg-cyan text-bg", yellow: "bg-yellow text-bg" }[color];
   return (
-    <div className={`skew-bar mb-4 inline-block px-4 py-2 ${bg}`}>
+    <div className={`skew-bar inline-block px-4 py-2 ${bg} ${className}`}>
       <h2 className="font-pixel text-xs">{children}</h2>
     </div>
   );
