@@ -32,9 +32,12 @@ type Tab = "matchups" | "history";
 export function MatchupsHistoryPanel({
   days,
   race,
+  heater,
 }: {
   days: MatchupDay[];
   race: { dates: string[]; lines: RaceLine[] };
+  /** Biggest points gain over the last 7 days, shown as the History chart's headline. */
+  heater: { name: string; color: string; gain: number } | null;
 }) {
   const [tab, setTab] = useState<Tab>("matchups");
   const [dayIndex, setDayIndex] = useState(() => Math.max(0, days.findIndex((d) => d.label === "TODAY")));
@@ -86,7 +89,22 @@ export function MatchupsHistoryPanel({
           </p>
         </Panel>
       ) : (
-        <Panel>
+        <Panel className="flex flex-col gap-4">
+          {heater && (
+            <div className="flex items-center gap-3 border-b-2 border-bg pb-4">
+              <span className="font-pixel text-[9px] leading-relaxed text-white">
+                BIGGEST HEATER
+                <br />
+                LAST 7 DAYS
+              </span>
+              <span className="min-w-0 flex-1 font-display text-lg leading-tight break-words" style={{ color: heater.color }}>
+                {heater.name}
+              </span>
+              <span className="font-display text-2xl" style={{ color: heater.color }}>
+                +{heater.gain}
+              </span>
+            </div>
+          )}
           {race.dates.length > 0 ? (
             <RaceChart dates={race.dates} lines={race.lines} />
           ) : (
