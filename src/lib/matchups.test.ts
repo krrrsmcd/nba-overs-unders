@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DatedScoredGame } from "./insights";
-import { isKeyMatchup, keyMatchups } from "./matchups";
+import { finalOutcome, isKeyMatchup, keyMatchups } from "./matchups";
 import type { PickRow } from "./scoring";
 
 const pick = (playerId: string, nbaTeamId: string, side: "W" | "L", pickNumber = 1): PickRow => ({
@@ -78,5 +78,23 @@ describe("keyMatchups", () => {
 
   it("returns nothing for a day without key games", () => {
     expect(keyMatchups([game("LAL", "DEN")], picks, "2026-10-31")).toEqual([]);
+  });
+});
+
+describe("finalOutcome", () => {
+  const s = (ownerId: string, side: "W" | "L", score: number) => ({ ownerId, side, score });
+
+  it("gives +1 to the head-to-head winner", () => {
+    const r = finalOutcome(s("a", "W", 110), s("b", "W", 102));
+    expect(r).toEqual({ who: s("a", "W", 110), points: 1 });
+    expect(finalOutcome(s("a", "L", 110), s("b", "L", 102))?.who.ownerId).toBe("b");
+  });
+  it("gives +2 or +0 for double-or-nothing", () => {
+    expect(finalOutcome(s("a", "W", 110), s("a", "L", 102))?.points).toBe(2);
+    expect(finalOutcome(s("a", "W", 98), s("a", "L", 102))?.points).toBe(0);
+  });
+  it("is null for ties and non-key games", () => {
+    expect(finalOutcome(s("a", "W", 100), s("b", "W", 100))).toBeNull();
+    expect(finalOutcome(s("a", "W", 110), s("b", "L", 102))).toBeNull();
   });
 });

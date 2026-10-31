@@ -23,6 +23,22 @@ export function isKeyMatchup(home: PickRow, away: PickRow): boolean {
   return home.playerId === away.playerId ? home.side !== away.side : home.side === away.side;
 }
 
+type Stake = { score: number; side: "W" | "L"; ownerId: string };
+
+/**
+ * Who scored from a finished key matchup: the head-to-head winner gets +1; a double-or-nothing
+ * owner gets +2 or +0. Null for a tie (no final NBA game) or a game that isn't key.
+ */
+export function finalOutcome<S extends Stake>(home: S, away: S): { who: S; points: number } | null {
+  if (home.score === away.score) return null;
+  const homeWon = home.score > away.score;
+  const homeScored = home.side === (homeWon ? "W" : "L");
+  const awayScored = away.side === (homeWon ? "L" : "W");
+  if (home.ownerId === away.ownerId) return { who: home, points: Number(homeScored) + Number(awayScored) };
+  if (homeScored === awayScored) return null;
+  return { who: homeScored ? home : away, points: 1 };
+}
+
 /** Key matchups on one schedule date: live games, then upcoming by tipoff, then finished games. */
 export function keyMatchups<G extends DatedScoredGame>(games: G[], picks: PickRow[], date: string): KeyMatchup<G>[] {
   const pickOf = new Map(picks.map((pk) => [pk.nbaTeamId, pk]));

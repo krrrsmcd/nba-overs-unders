@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RaceChart, type RaceLine } from "@/components/race-chart";
 import { Panel } from "@/components/ui";
+import { finalOutcome } from "@/lib/matchups";
 
 export type MatchupSide = {
   teamId: string;
@@ -10,6 +11,7 @@ export type MatchupSide = {
   teamColor: string;
   record: string;
   score: number;
+  ownerId: string;
   ownerName: string;
   ownerColor: string;
   side: "W" | "L";
@@ -148,7 +150,7 @@ function MatchupCard({ m }: { m: MatchupRow }) {
             LIVE
           </span>
         ) : final ? (
-          <span className="font-pixel text-[8px] text-ink-dim">FINAL</span>
+          <FinalStatus m={m} />
         ) : (
           <span className="font-pixel text-[8px] text-ink-dim" suppressHydrationWarning>
             {m.tipoffAt ? tipoffTime(m.tipoffAt) : "TBD"}
@@ -156,6 +158,28 @@ function MatchupCard({ m }: { m: MatchupRow }) {
         )}
       </div>
     </li>
+  );
+}
+
+function FinalStatus({ m }: { m: MatchupRow }) {
+  const outcome = finalOutcome(m.home, m.away);
+  return (
+    <span className="font-pixel flex min-w-0 items-center gap-1.5 text-[8px] text-ink-dim">
+      <span className="shrink-0">FINAL</span>
+      {outcome && (
+        <>
+          <span aria-hidden className="shrink-0">
+            •
+          </span>
+          <span className="truncate uppercase" style={{ color: outcome.who.ownerColor }}>
+            {outcome.who.ownerName}
+          </span>
+          <span className="shrink-0" style={{ color: outcome.who.ownerColor }}>
+            +{outcome.points}
+          </span>
+        </>
+      )}
+    </span>
   );
 }
 

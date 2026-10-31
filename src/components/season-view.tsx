@@ -139,6 +139,7 @@ export function SeasonBoard({
       teamColor: t.primaryColor,
       record: `${rec.wins}–${rec.losses}`,
       score,
+      ownerId: pk.playerId,
       ownerName: nameOf.get(pk.playerId) ?? "Unnamed",
       ownerColor: colorOf.get(pk.playerId) ?? "#f4f1ff",
       side: pk.side,
