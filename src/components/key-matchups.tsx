@@ -81,6 +81,9 @@ export function MatchupsHistoryPanel({
               ))}
             </ul>
           )}
+          <p className="text-center text-[11px] leading-snug text-ink-dim">
+            Key matchups are games where the result swings the gap between two players by 2 points.
+          </p>
         </Panel>
       ) : (
         <Panel>
