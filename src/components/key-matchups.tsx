@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { RaceChart, type RaceLine } from "@/components/race-chart";
 import { Panel } from "@/components/ui";
 import { finalOutcome } from "@/lib/matchups";
@@ -152,8 +152,8 @@ function MatchupCard({ m }: { m: MatchupRow }) {
         ) : final ? (
           <FinalStatus m={m} />
         ) : (
-          <span className="font-pixel text-[8px] text-ink-dim" suppressHydrationWarning>
-            {m.tipoffAt ? tipoffTime(m.tipoffAt) : "TBD"}
+          <span className="font-pixel text-[8px] text-ink-dim">
+            {m.tipoffAt ? <TipoffTime iso={m.tipoffAt} /> : "TBD"}
           </span>
         )}
       </div>
@@ -220,6 +220,18 @@ function longDate(d: string) {
   });
 }
 
-function tipoffTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+const noSubscribe = () => () => {};
+
+/**
+ * Tipoff in the viewer's own time zone. The server renders in UTC, so the time is only
+ * formatted once hydrated in the browser; until then a blank keeps the footer's height.
+ */
+function TipoffTime({ iso }: { iso: string }) {
+  const inBrowser = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  if (!inBrowser) return <>&nbsp;</>;
+  return <>{new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</>;
 }
