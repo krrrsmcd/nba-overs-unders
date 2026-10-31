@@ -136,21 +136,21 @@ function MatchupCard({ m }: { m: MatchupRow }) {
   const final = m.status === "final";
   const winner = final ? (m.home.score > m.away.score ? "home" : m.away.score > m.home.score ? "away" : null) : null;
   return (
-    <li className="border-2 border-bg bg-panel-2 px-3 py-2.5">
-      <div className="mb-2 flex justify-end">
-        {m.status === "in_progress" ? (
-          <span className="font-pixel blink text-[9px] text-cyan">LIVE</span>
-        ) : final ? (
-          <span className="font-pixel text-[9px] text-ink-dim">FINAL</span>
-        ) : (
-          <span className="font-pixel text-[9px] text-yellow" suppressHydrationWarning>
-            {m.tipoffAt ? tipoffTime(m.tipoffAt) : "TBD"}
-          </span>
-        )}
-      </div>
+    <li className="border-2 border-bg bg-panel-2 px-3 pt-2.5 pb-2">
       <div className="flex flex-col gap-1.5">
         <TeamLine s={m.away} showScore={m.status !== "scheduled"} dim={winner === "home"} />
         <TeamLine s={m.home} showScore={m.status !== "scheduled"} dim={winner === "away"} />
+      </div>
+      <div className="mt-2.5 flex justify-center border-t-2 border-bg pt-2">
+        {m.status === "in_progress" ? (
+          <span className="font-pixel blink text-[8px] text-cyan">LIVE</span>
+        ) : final ? (
+          <span className="font-pixel text-[8px] text-ink-dim">FINAL</span>
+        ) : (
+          <span className="font-pixel text-[8px] text-yellow" suppressHydrationWarning>
+            {m.tipoffAt ? tipoffTime(m.tipoffAt) : "TBD"}
+          </span>
+        )}
       </div>
     </li>
   );
