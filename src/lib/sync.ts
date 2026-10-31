@@ -122,7 +122,9 @@ export async function syncScores(now = currentTime()): Promise<"fresh" | "locked
     const today = easternDate(now);
     const yesterday = addDays(today, -1);
     const windowStart = state?.lastCompleteDate ? addDays(state.lastCompleteDate, 1) : REGULAR_SEASON_START;
-    const windowEnd = minDate(today, REGULAR_SEASON_END);
+    // Fetch through tomorrow so its schedule is available (Key Matchups). Scoring is unaffected:
+    // lastCompleteDate never passes yesterday, so today and tomorrow are always re-fetched.
+    const windowEnd = minDate(addDays(today, 1), REGULAR_SEASON_END);
     let fetchedThrough: string | null = null;
 
     for (let start = windowStart; start <= windowEnd; ) {

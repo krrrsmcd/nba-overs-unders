@@ -73,5 +73,23 @@ export function demoSeason(seed = 2027) {
     g.awayScore = isHome ? hi : lo;
   }
 
+  // Today's slate (some live, some upcoming) and tomorrow's, for Key Matchups.
+  for (const date of [DEMO_TODAY, addDays(DEMO_TODAY, 1)]) {
+    const teams = NBA_TEAMS.map((t) => t.id).sort(() => random() - 0.5).slice(0, 16);
+    for (let k = 0; k + 1 < teams.length; k += 2) {
+      const live = date === DEMO_TODAY && k < 6;
+      games.push({
+        gameDate: date,
+        tipoffAt: new Date(new Date(`${date}T23:00:00Z`).getTime() + (k / 2) * 30 * 60 * 1000),
+        homeTeamId: teams[k],
+        awayTeamId: teams[k + 1],
+        homeScore: live ? 40 + Math.floor(random() * 30) : 0,
+        awayScore: live ? 40 + Math.floor(random() * 30) : 0,
+        status: live ? "in_progress" : "scheduled",
+        counts: true,
+      });
+    }
+  }
+
   return { players, picks, games };
 }

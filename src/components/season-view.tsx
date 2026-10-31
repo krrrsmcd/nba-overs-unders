@@ -10,12 +10,13 @@ import { NBA_TEAMS } from "@/db/teams";
 import { projectedPickPoints } from "@/lib/projection";
 import { raceSeries } from "@/lib/race";
 import { leaderboard, teamRecords, type PickRow } from "@/lib/scoring";
-import { RaceChart } from "@/components/race-chart";
+import { MatchupsHistoryPanel, type MatchupDay, type MatchupRow, type MatchupSide } from "@/components/key-matchups";
+import { keyMatchups } from "@/lib/matchups";
 import { playerColor } from "@/lib/colors";
 import { Confetti, Flame, Trophy } from "@/components/pixel-art";
 import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks, type DatedScoredGame } from "@/lib/insights";
 import { getLeaguePicks, getLeaguePlayers, type League, type Player } from "@/lib/session";
-import { currentTime, easternDate, getLastSyncedAt, REGULAR_SEASON_END, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
+import { addDays, currentTime, easternDate, getLastSyncedAt, REGULAR_SEASON_END, REGULAR_SEASON_START, syncScores } from "@/lib/sync";
 
 const TEAM_BY_ID = new Map(NBA_TEAMS.map((t) => [t.id, t]));
 const SYNC_WAIT_MS = 3000;
@@ -127,6 +128,39 @@ export function SeasonBoard({
   const mover = started && !over ? biggestMover(recentGains(race.dates, race.series)) : null;
   const moverName = mover && players.find((p) => p.id === mover.playerId)?.teamName;
   const tied = (rank: number) => rows.filter((r) => r.rank === rank).length > 1;
+
+  const nameOf = new Map(players.map((p) => [p.id, p.teamName ?? "Unnamed"]));
+  const sideOf = (teamId: string, score: number, pk: PickRow): MatchupSide => {
+    const t = TEAM_BY_ID.get(teamId)!;
+    const rec = records.get(teamId) ?? { wins: 0, losses: 0 };
+    return {
+      teamId,
+      teamName: t.name,
+      teamColor: t.primaryColor,
+      record: `${rec.wins}–${rec.losses}`,
+      score,
+      ownerName: nameOf.get(pk.playerId) ?? "Unnamed",
+      ownerColor: colorOf.get(pk.playerId) ?? "#f4f1ff",
+      side: pk.side,
+    };
+  };
+  const matchupDays: MatchupDay[] = (
+    [
+      ["YESTERDAY", addDays(today, -1)],
+      ["TODAY", today],
+      ["TOMORROW", addDays(today, 1)],
+    ] as const
+  ).map(([label, date]) => ({
+    label,
+    date,
+    rows: keyMatchups(games, picks, date).map(({ game: g, homePick, awayPick }) => ({
+      key: `${g.gameDate}-${g.awayTeamId}-${g.homeTeamId}`,
+      status: g.status as MatchupRow["status"], // postponed games are excluded by keyMatchups
+      tipoffAt: g.tipoffAt ? g.tipoffAt.toISOString() : null,
+      away: sideOf(g.awayTeamId, g.awayScore, awayPick),
+      home: sideOf(g.homeTeamId, g.homeScore, homePick),
+    })),
+  }));
 
   return (
     <>
@@ -280,14 +314,7 @@ export function SeasonBoard({
         </Panel>
       )}
 
-      {race.dates.length > 0 && (
-        <section>
-          <SectionBar>HISTORY</SectionBar>
-          <Panel>
-            <RaceChart dates={race.dates} lines={raceLines} />
-          </Panel>
-        </section>
-      )}
+      <MatchupsHistoryPanel days={matchupDays} race={{ dates: race.dates, lines: raceLines }} />
 
       {canDelete && !demo && <CommissionerZone leagueId={league.id} leagueName={league.name} />}
     </>
