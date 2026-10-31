@@ -7,18 +7,8 @@ export type RaceLine = { id: string; name: string; isMe: boolean; values: number
 import { SERIES_COLORS } from "@/lib/colors";
 
 const H = 260;
-const PAD = { top: 16, right: 92, bottom: 28, left: 36 };
-
-/** Break a name into lines of at most `max` characters (words kept whole where possible). */
-function wrap(name: string, max = 12): string[] {
-  const lines: string[] = [];
-  for (const word of name.split(/\s+/)) {
-    const last = lines.at(-1);
-    if (last !== undefined && (last + " " + word).length <= max) lines[lines.length - 1] = `${last} ${word}`;
-    else for (let i = 0; i < Math.max(1, word.length); i += max) lines.push(word.slice(i, i + max));
-  }
-  return lines;
-}
+// Right padding only needs room for the end-of-line dots (the legend names each line).
+const PAD = { top: 16, right: 8, bottom: 28, left: 36 };
 
 function niceStep(max: number) {
   const raw = max / 4;
@@ -55,21 +45,6 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
   const ticks = Array.from({ length: top / step + 1 }, (_, k) => k * step);
   const xTickEvery = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(iw / 70))));
 
-  // End labels: highest first; skip a label that would collide (the legend still names it).
-  const ends = lines
-    .map((l, i) => ({ l, color: SERIES_COLORS[i % SERIES_COLORS.length], v: l.values.at(-1) ?? 0 }))
-    .sort((a, b) => b.v - a.v);
-  const placed: [number, number][] = [];
-  const endLabels = ends
-    .map((e) => ({ ...e, lines: wrap(e.l.name) }))
-    .filter((e) => {
-      const top = y(e.v) - 4;
-      const bottom = top + e.lines.length * 13;
-      if (placed.some(([a, b]) => top < b + 2 && bottom > a - 2)) return false;
-      placed.push([top, bottom]);
-      return true;
-    });
-
   const hi = hover ?? n - 1;
   const tooltipRows = lines
     .map((l, i) => ({ l, color: SERIES_COLORS[i % SERIES_COLORS.length], v: l.values[hi] ?? 0 }))
@@ -104,8 +79,16 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
             </g>
           ))}
           {dates.map((d, i) =>
-            i % xTickEvery === 0 || i === n - 1 ? (
-              <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize={11} fill="#a9a6c9">
+            // The last date is always labeled; drop a regular label that would crowd it.
+            (i % xTickEvery === 0 && x(n - 1) - x(i) >= 60) || i === n - 1 ? (
+              <text
+                key={d}
+                x={x(i)}
+                y={H - 8}
+                textAnchor={i === n - 1 && n > 1 ? "end" : "middle"}
+                fontSize={11}
+                fill="#a9a6c9"
+              >
                 {shortDate(d)}
               </text>
             ) : null,
@@ -125,16 +108,6 @@ export function RaceChart({ dates, lines }: { dates: string[]; lines: RaceLine[]
               </g>
             );
           })}
-
-          {endLabels.map((e) => (
-            <text key={e.l.id} x={x(n - 1) + 10} y={y(e.v) + 4} fontSize={11} fill="#f4f1ff">
-              {e.lines.map((line, k) => (
-                <tspan key={k} x={x(n - 1) + 10} dy={k ? 13 : 0}>
-                  {line}
-                </tspan>
-              ))}
-            </text>
-          ))}
 
           <rect
             x={PAD.left}
