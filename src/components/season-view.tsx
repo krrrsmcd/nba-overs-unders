@@ -166,7 +166,6 @@ export function SeasonBoard({
   return (
     <>
       <header className="flex flex-col gap-2">
-        <p className="font-pixel text-[10px] text-cyan">{league.size}-PLAYER LEAGUE · 2026–27 SEASON</p>
         <h1 className="arcade-title text-4xl leading-tight sm:text-5xl">{league.name}</h1>
       </header>
 
