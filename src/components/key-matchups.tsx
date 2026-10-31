@@ -141,7 +141,7 @@ function MatchupCard({ m }: { m: MatchupRow }) {
         <TeamLine s={m.away} showScore={m.status !== "scheduled"} dim={winner === "home"} />
         <TeamLine s={m.home} showScore={m.status !== "scheduled"} dim={winner === "away"} />
       </div>
-      <div className="mt-2.5 flex justify-center border-t-2 border-bg pt-2">
+      <div className="mt-2.5 flex justify-center">
         {m.status === "in_progress" ? (
           <span className="font-pixel blink text-[8px] text-cyan">LIVE</span>
         ) : final ? (
