@@ -143,11 +143,14 @@ function MatchupCard({ m }: { m: MatchupRow }) {
       </div>
       <div className="mt-2.5 flex justify-center">
         {m.status === "in_progress" ? (
-          <span className="font-pixel blink text-[8px] text-cyan">LIVE</span>
+          <span className="font-pixel flex items-center gap-1.5 text-[8px] text-white">
+            <span aria-hidden className="blink inline-block h-1.5 w-1.5 rounded-full bg-magenta" />
+            LIVE
+          </span>
         ) : final ? (
           <span className="font-pixel text-[8px] text-ink-dim">FINAL</span>
         ) : (
-          <span className="font-pixel text-[8px] text-yellow" suppressHydrationWarning>
+          <span className="font-pixel text-[8px] text-ink-dim" suppressHydrationWarning>
             {m.tipoffAt ? tipoffTime(m.tipoffAt) : "TBD"}
           </span>
         )}
