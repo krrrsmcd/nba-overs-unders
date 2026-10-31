@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { makePick, type FormState } from "@/app/actions";
 import { Modal } from "@/components/modal";
 import { markPickHeard, playPickSound } from "@/components/pick-sound";
+import { RefreshIcon } from "@/components/pixel-art";
 import { buttonClass, smallButtonClass } from "@/components/ui";
 import { WIN_TOTAL_SOURCES, type TeamSeed } from "@/db/teams";
 
@@ -37,8 +38,14 @@ export function RefreshControls() {
     };
   }, [router]);
   return (
-    <button type="button" className={smallButtonClass} disabled={pending} onClick={() => start(() => router.refresh())}>
-      {pending ? "…" : "↻ REFRESH"}
+    <button
+      type="button"
+      className={smallButtonClass}
+      disabled={pending}
+      onClick={() => start(() => router.refresh())}
+      title="Refresh"
+    >
+      <RefreshIcon size={12} />
     </button>
   );
 }

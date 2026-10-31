@@ -20,6 +20,23 @@ function Pixels({ rows, palette, size, label }: { rows: string[]; palette: Recor
   );
 }
 
+const REFRESH = [
+  "..xxxx...",
+  ".x....x.x",
+  "x......xx",
+  "x....xxxx",
+  "x........",
+  "x.......x",
+  "x.......x",
+  ".x.....x.",
+  "..xxxxx..",
+];
+
+/** Circular refresh arrow in the current text color. */
+export function RefreshIcon({ size = 12 }: { size?: number }) {
+  return <Pixels rows={REFRESH} palette={{ x: "currentColor" }} size={size} label="Refresh" />;
+}
+
 const FLAME = [
   "...r...",
   "..rr...",

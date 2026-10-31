@@ -27,13 +27,14 @@ function ordinal(n: number) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-function ago(at: Date | null) {
-  if (!at) return "not yet";
+/** "Updated 7m ago", "Updated 2h ago", "Updated 3d ago". */
+function updatedLabel(at: Date | null) {
+  if (!at) return "Not updated yet";
   const min = Math.round((Date.now() - at.getTime()) / 60000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} min ago`;
+  if (min < 1) return "Updated just now";
+  if (min < 60) return `Updated ${min}m ago`;
   const h = Math.round(min / 60);
-  return h < 24 ? `${h} hr ago` : `${Math.round(h / 24)} days ago`;
+  return h < 24 ? `Updated ${h}h ago` : `Updated ${Math.round(h / 24)}d ago`;
 }
 
 /** Season standings for a league whose draft is complete. */
@@ -59,7 +60,7 @@ export async function SeasonView({ league, me }: { league: League; me: Player })
       players={players}
       picks={picks}
       games={games.map((g) => ({ ...g, gameDate: String(g.gameDate) }))}
-      syncedLabel={`Scores updated ${ago(syncedAt)}`}
+      syncedLabel={updatedLabel(syncedAt)}
       today={easternDate(currentTime())}
       canDelete={me.isCommissioner}
     />
