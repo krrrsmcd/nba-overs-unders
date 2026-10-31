@@ -91,7 +91,7 @@ export function MatchupsHistoryPanel({
       ) : (
         <Panel className="flex flex-col gap-4">
           {heater && (
-            <div className="flex items-center gap-3 border-b-2 border-bg pb-4">
+            <div className="flex items-center gap-3 border-b-2 border-white pb-4">
               <span className="font-pixel text-[9px] leading-relaxed text-white">
                 BIGGEST HEATER
                 <br />
