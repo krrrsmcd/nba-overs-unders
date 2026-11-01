@@ -160,6 +160,7 @@ export function SeasonBoard({
       status: g.status as MatchupRow["status"], // postponed games are excluded by dayMatchups
       tipoffAt: g.tipoffAt ? g.tipoffAt.toISOString() : null,
       liveClock: g.status === "in_progress" ? (g.liveClock ?? null) : null,
+      mine: homePick.playerId === me.id || awayPick.playerId === me.id,
       away: sideOf(g.awayTeamId, g.awayScore, awayPick),
       home: sideOf(g.homeTeamId, g.homeScore, homePick),
     })),

@@ -25,6 +25,8 @@ export type MatchupRow = {
   tipoffAt: string | null;
   /** Quarter and clock while live, e.g. "Q3 3:44"; null when unknown. */
   liveClock: string | null;
+  /** One of the viewer's teams is playing (card gets a lighter background). */
+  mine: boolean;
   away: MatchupSide;
   home: MatchupSide;
 };
@@ -143,7 +145,7 @@ function MatchupCard({ m }: { m: MatchupRow }) {
   const final = m.status === "final";
   const winner = final ? (m.home.score > m.away.score ? "home" : m.away.score > m.home.score ? "away" : null) : null;
   return (
-    <li className="border-2 border-bg bg-panel-2 px-3 pt-2.5 pb-2">
+    <li className={`border-2 border-bg px-3 pt-2.5 pb-2 ${m.mine ? "bg-[#2b2b5a]" : "bg-panel-2"}`}>
       <div className="flex flex-col gap-1.5">
         <TeamLine s={m.away} showScore={m.status !== "scheduled"} dim={winner === "home"} />
         <TeamLine s={m.home} showScore={m.status !== "scheduled"} dim={winner === "away"} />
