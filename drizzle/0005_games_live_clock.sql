@@ -1,0 +1,1 @@
+ALTER TABLE "games" ADD COLUMN "live_clock" text;

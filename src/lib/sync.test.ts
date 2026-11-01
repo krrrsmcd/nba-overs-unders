@@ -45,3 +45,24 @@ describe("gameStatus", async () => {
     expect(gameStatus(g("Delayed", "delayed"))).toBe("in_progress");
   });
 });
+
+describe("liveClockLabel", async () => {
+  const { liveClockLabel } = await import("./balldontlie");
+  const g = (status: string, status_state: string, period: number | null, time: string | null) =>
+    ({ status, status_state, period, time }) as Parameters<typeof liveClockLabel>[0];
+  it("shows the quarter and clock while live", () => {
+    expect(liveClockLabel(g("3rd Qtr", "in_progress", 3, "3:44"))).toBe("Q3 3:44");
+    expect(liveClockLabel(g("1st Qtr", "in_progress", 1, ""))).toBe("Q1");
+  });
+  it("names halftime, quarter breaks and overtime", () => {
+    expect(liveClockLabel(g("Halftime", "in_progress", 2, ""))).toBe("HALF");
+    expect(liveClockLabel(g("End of 1st Qtr", "in_progress", 1, "0:00"))).toBe("END Q1");
+    expect(liveClockLabel(g("OT", "in_progress", 5, "1:20"))).toBe("OT 1:20");
+    expect(liveClockLabel(g("2OT", "in_progress", 6, "0:45"))).toBe("2OT 0:45");
+  });
+  it("is null outside live play or without a period", () => {
+    expect(liveClockLabel(g("Final", "final", 4, "Final"))).toBeNull();
+    expect(liveClockLabel(g("7:00 pm ET", "scheduled", 0, ""))).toBeNull();
+    expect(liveClockLabel(g("Delayed", "delayed", 0, ""))).toBeNull();
+  });
+});

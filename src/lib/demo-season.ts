@@ -86,6 +86,7 @@ export function demoSeason(seed = 2027) {
         homeScore: live ? 40 + Math.floor(random() * 30) : 0,
         awayScore: live ? 40 + Math.floor(random() * 30) : 0,
         status: live ? "in_progress" : "scheduled",
+        liveClock: live ? ["Q3 4:12", "HALF", "Q2 0:38"][k / 2] : null,
         counts: true,
       });
     }

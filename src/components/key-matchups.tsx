@@ -23,6 +23,8 @@ export type MatchupRow = {
   status: "scheduled" | "in_progress" | "final";
   /** ISO timestamp; formatted in the viewer's time zone. */
   tipoffAt: string | null;
+  /** Quarter and clock while live, e.g. "Q3 3:44"; null when unknown. */
+  liveClock: string | null;
   away: MatchupSide;
   home: MatchupSide;
 };
@@ -154,6 +156,14 @@ function MatchupCard({ m }: { m: MatchupRow }) {
           <span className="font-pixel flex items-center gap-1.5 text-[8px] text-white">
             <span aria-hidden className="blink inline-block h-1.5 w-1.5 rounded-full bg-magenta" />
             LIVE
+            {m.liveClock && (
+              <>
+                <span aria-hidden className="text-ink-dim">
+                  •
+                </span>
+                {m.liveClock}
+              </>
+            )}
           </span>
         ) : final ? (
           <FinalStatus m={m} />

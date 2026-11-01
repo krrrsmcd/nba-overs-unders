@@ -2,7 +2,7 @@ import "server-only";
 import { and, eq, gte, isNull, lt, lte, notInArray, or, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db";
 import { NBA_TEAMS } from "@/db/teams";
-import { fetchGamesPage, gameStatus, RateLimitedError, type BdlGame } from "@/lib/balldontlie";
+import { fetchGamesPage, gameStatus, liveClockLabel, RateLimitedError, type BdlGame } from "@/lib/balldontlie";
 
 export const SEASON = 2026; // balldontlie season id for 2026–27
 export const REGULAR_SEASON_START = "2026-10-20";
@@ -58,6 +58,7 @@ async function upsertGames(games: BdlGame[]) {
       homeScore: g.home_team_score ?? 0,
       awayScore: g.visitor_team_score ?? 0,
       status: gameStatus(g),
+      liveClock: liveClockLabel(g),
       postseason: g.postseason,
       counts: gameCounts({ ...g, date: g.date.slice(0, 10) }),
       updatedAt: new Date(),
@@ -74,6 +75,7 @@ async function upsertGames(games: BdlGame[]) {
         homeScore: sql`excluded.home_score`,
         awayScore: sql`excluded.away_score`,
         status: sql`excluded.status`,
+        liveClock: sql`excluded.live_clock`,
         postseason: sql`excluded.postseason`,
         counts: sql`excluded.counts`,
         updatedAt: sql`excluded.updated_at`,

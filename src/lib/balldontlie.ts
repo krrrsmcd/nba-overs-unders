@@ -17,6 +17,10 @@ export type BdlGame = {
   visitor_team: { abbreviation: string };
   home_team_score: number;
   visitor_team_score: number;
+  /** 0 before tip-off, 1–4 quarters, 5+ overtime. */
+  period?: number | null;
+  /** Clock left in the period, e.g. "3:44"; empty or "Final" outside live play. */
+  time?: string | null;
 };
 
 export class RateLimitedError extends Error {}
@@ -48,6 +52,21 @@ export async function fetchGamesPage(opts: {
   if (!res.ok) throw new Error(`balldontlie ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const body = (await res.json()) as { data: BdlGame[]; meta?: { next_cursor?: number | null } };
   return { games: body.data, nextCursor: body.meta?.next_cursor ?? undefined };
+}
+
+/**
+ * Quarter and clock for a live game, e.g. "Q3 3:44", "HALF", "END Q1", "OT 1:20", "2OT".
+ * Null unless the game is in progress with a known period.
+ */
+export function liveClockLabel(g: BdlGame): string | null {
+  if (gameStatus(g) !== "in_progress") return null;
+  if (/half/i.test(g.status)) return "HALF";
+  const p = g.period ?? 0;
+  if (p <= 0) return null;
+  const q = p <= 4 ? `Q${p}` : p === 5 ? "OT" : `${p - 4}OT`;
+  if (/^end/i.test(g.status)) return `END ${q}`;
+  const t = (g.time ?? "").trim();
+  return /^\d/.test(t) ? `${q} ${t}` : q;
 }
 
 /** Our lifecycle status for a balldontlie game. "postponed" covers postponed, canceled and abandoned games. */

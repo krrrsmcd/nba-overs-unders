@@ -115,6 +115,8 @@ export const games = pgTable(
     homeScore: integer("home_score").notNull().default(0),
     awayScore: integer("away_score").notNull().default(0),
     status: text("status", { enum: ["scheduled", "in_progress", "final", "postponed"] }).notNull(),
+    // Quarter and clock while live, e.g. "Q3 3:44" or "HALF"; null otherwise.
+    liveClock: text("live_clock"),
     postseason: boolean("postseason").notNull().default(false),
     // Only regular-season games count (excludes play-in, playoffs, NBA Cup final).
     counts: boolean("counts").notNull().default(true),

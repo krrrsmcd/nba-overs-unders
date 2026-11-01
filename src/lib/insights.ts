@@ -2,7 +2,7 @@
 
 import type { ScoredGame } from "@/lib/scoring";
 
-export type DatedScoredGame = ScoredGame & { gameDate: string; tipoffAt?: Date | null };
+export type DatedScoredGame = ScoredGame & { gameDate: string; tipoffAt?: Date | null; liveClock?: string | null };
 export type Streak = { result: "W" | "L"; length: number };
 
 export const HOT_STREAK = 3;
