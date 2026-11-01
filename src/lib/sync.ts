@@ -64,14 +64,6 @@ async function upsertGames(games: BdlGame[]) {
       updatedAt: new Date(),
     }));
   if (rows.length === 0) return;
-  // Raw clock fields for live games, to check balldontlie's format in the deploy logs.
-  for (const g of games) {
-    if (gameStatus(g) === "in_progress") {
-      console.info(
-        `[sync] live bdl:${g.id} status=${JSON.stringify(g.status)} period=${g.period} time=${JSON.stringify(g.time)} -> ${JSON.stringify(liveClockLabel(g))}`,
-      );
-    }
-  }
   await getDb()
     .insert(schema.games)
     .values(rows)
