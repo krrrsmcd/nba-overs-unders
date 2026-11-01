@@ -155,14 +155,14 @@ function MatchupCard({ m }: { m: MatchupRow }) {
         {m.status === "in_progress" ? (
           <span className="font-pixel flex items-center gap-1.5 text-[8px] text-white">
             <span aria-hidden className="blink inline-block h-1.5 w-1.5 rounded-full bg-magenta" />
-            LIVE
-            {m.liveClock && (
+            {/* The dot marks it live; the word only shows when the clock isn't known yet. */}
+            {m.liveClock ? (
               <>
-                <span aria-hidden className="text-ink-dim">
-                  •
-                </span>
+                <span className="sr-only">Live, </span>
                 {m.liveClock}
               </>
+            ) : (
+              "LIVE"
             )}
           </span>
         ) : final ? (
