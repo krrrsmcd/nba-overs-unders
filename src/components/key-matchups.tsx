@@ -222,7 +222,8 @@ function TeamLine({ s, showScore, dim }: { s: MatchupSide; showScore: boolean; d
           {s.ownerName}
         </span>
         <span
-          className={`font-pixel text-[9px] ${s.side === "W" ? "text-win" : "text-loss"}`}
+          className="font-pixel text-[9px]"
+          style={{ color: s.ownerColor }}
           title={s.side === "W" ? "Wins" : "Losses"}
         >
           {s.side}
