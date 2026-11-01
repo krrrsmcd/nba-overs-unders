@@ -60,6 +60,16 @@ describe("liveClockLabel", async () => {
     expect(liveClockLabel(g("OT", "in_progress", 5, "1:20"))).toBe("OT 1:20");
     expect(liveClockLabel(g("2OT", "in_progress", 6, "0:45"))).toBe("2OT 0:45");
   });
+  it("finds the clock in other formats", () => {
+    expect(liveClockLabel(g("3rd Qtr", "in_progress", 3, "Q3 3:44"))).toBe("Q3 3:44");
+    expect(liveClockLabel(g("3rd Qtr", "in_progress", 3, " 3:44 3rd"))).toBe("Q3 3:44");
+    expect(liveClockLabel(g("4th Qtr", "in_progress", 4, "45.3"))).toBe("Q4 45.3");
+    expect(liveClockLabel(g("Q2 5:21", "in_progress", 2, ""))).toBe("Q2 5:21");
+  });
+  it("reads the quarter from the status when period is missing", () => {
+    expect(liveClockLabel(g("2nd Qtr", "in_progress", null, "7:14"))).toBe("Q2 7:14");
+    expect(liveClockLabel(g("OT", "in_progress", 0, "2:00"))).toBe("OT 2:00");
+  });
   it("is null outside live play or without a period", () => {
     expect(liveClockLabel(g("Final", "final", 4, "Final"))).toBeNull();
     expect(liveClockLabel(g("7:00 pm ET", "scheduled", 0, ""))).toBeNull();

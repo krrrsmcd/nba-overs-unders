@@ -60,13 +60,30 @@ export async function fetchGamesPage(opts: {
  */
 export function liveClockLabel(g: BdlGame): string | null {
   if (gameStatus(g) !== "in_progress") return null;
-  if (/half/i.test(g.status)) return "HALF";
-  const p = g.period ?? 0;
+  const status = g.status ?? "";
+  if (/half/i.test(status)) return "HALF";
+  const p = g.period || periodFromStatus(status);
   if (p <= 0) return null;
   const q = p <= 4 ? `Q${p}` : p === 5 ? "OT" : `${p - 4}OT`;
-  if (/^end/i.test(g.status)) return `END ${q}`;
-  const t = (g.time ?? "").trim();
-  return /^\d/.test(t) ? `${q} ${t}` : q;
+  if (/^end/i.test(status)) return `END ${q}`;
+  // The clock is documented as "3:44", but accept it anywhere in the field (e.g. "Q3 3:44",
+  // "3:44 3rd", "45.3" under a minute), falling back to the status text.
+  const clock = findClock(g.time ?? "") ?? findClock(status);
+  return clock ? `${q} ${clock}` : q;
+}
+
+const CLOCK = /\d{1,2}:\d{2}(?:\.\d)?|\b\d{1,2}\.\d\b/;
+
+function findClock(text: string): string | null {
+  return text.match(CLOCK)?.[0] ?? null;
+}
+
+/** 1–4 from "3rd Qtr", 5+ from "OT" / "2OT"; 0 when unknown. */
+function periodFromStatus(status: string): number {
+  const qtr = status.match(/([1-4])(?:st|nd|rd|th)\s*q/i);
+  if (qtr) return Number(qtr[1]);
+  const ot = status.match(/(\d)?\s*OT/i);
+  return ot ? 4 + Number(ot[1] ?? 1) : 0;
 }
 
 /** Our lifecycle status for a balldontlie game. "postponed" covers postponed, canceled and abandoned games. */
