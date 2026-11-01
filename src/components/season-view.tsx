@@ -11,7 +11,7 @@ import { projectedPickPoints } from "@/lib/projection";
 import { raceSeries } from "@/lib/race";
 import { leaderboard, teamRecords, type PickRow } from "@/lib/scoring";
 import { MatchupsHistoryPanel, type MatchupDay, type MatchupRow, type MatchupSide } from "@/components/key-matchups";
-import { keyMatchups } from "@/lib/matchups";
+import { dayMatchups } from "@/lib/matchups";
 import { playerColor } from "@/lib/colors";
 import { Confetti, Flame, Trophy } from "@/components/pixel-art";
 import { biggestMover, HOT_STREAK, isSeasonOver, pickStreak, recentGains, teamStreaks, type DatedScoredGame } from "@/lib/insights";
@@ -155,9 +155,9 @@ export function SeasonBoard({
   ).map(([label, date]) => ({
     label,
     date,
-    rows: keyMatchups(games, picks, date).map(({ game: g, homePick, awayPick }) => ({
+    rows: dayMatchups(games, picks, date).map(({ game: g, homePick, awayPick }) => ({
       key: `${g.gameDate}-${g.awayTeamId}-${g.homeTeamId}`,
-      status: g.status as MatchupRow["status"], // postponed games are excluded by keyMatchups
+      status: g.status as MatchupRow["status"], // postponed games are excluded by dayMatchups
       tipoffAt: g.tipoffAt ? g.tipoffAt.toISOString() : null,
       liveClock: g.status === "in_progress" ? (g.liveClock ?? null) : null,
       away: sideOf(g.awayTeamId, g.awayScore, awayPick),

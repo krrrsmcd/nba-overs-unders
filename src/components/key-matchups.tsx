@@ -33,7 +33,7 @@ export type MatchupDay = { label: "YESTERDAY" | "TODAY" | "TOMORROW"; date: stri
 
 type Tab = "matchups" | "history";
 
-/** Key Matchups and History share one panel; Key Matchups shows first. */
+/** Matchups and History share one panel; Matchups shows first. */
 export function MatchupsHistoryPanel({
   days,
   race,
@@ -50,9 +50,9 @@ export function MatchupsHistoryPanel({
 
   return (
     <section>
-      <div role="tablist" aria-label="Key matchups and history" className="mb-4 flex gap-2">
+      <div role="tablist" aria-label="Matchups and history" className="mb-4 flex gap-2">
         <TabButton active={tab === "matchups"} onClick={() => setTab("matchups")}>
-          KEY MATCHUPS
+          MATCHUPS
         </TabButton>
         <TabButton active={tab === "history"} onClick={() => setTab("history")}>
           HISTORY
@@ -80,7 +80,7 @@ export function MatchupsHistoryPanel({
 
           {day.rows.length === 0 ? (
             <p className="font-pixel py-4 text-center text-[10px] leading-relaxed text-ink-dim">
-              NO KEY MATCHUPS {day.label}
+              NO MATCHUPS {day.label}
             </p>
           ) : (
             <ul className="flex flex-col gap-3">
@@ -89,9 +89,6 @@ export function MatchupsHistoryPanel({
               ))}
             </ul>
           )}
-          <p className="text-center text-[11px] leading-snug text-ink-dim">
-            Key matchups are games where the result swings the gap between two players by 2 points.
-          </p>
         </Panel>
       ) : (
         <Panel className="flex flex-col gap-4">
@@ -177,24 +174,31 @@ function MatchupCard({ m }: { m: MatchupRow }) {
   );
 }
 
+/** "FINAL • AIR BALLERS +1 • BRICK CITY +1", or "FINAL • NO POINTS". Wraps on narrow cards. */
 function FinalStatus({ m }: { m: MatchupRow }) {
   const outcome = finalOutcome(m.home, m.away);
+  const dot = (
+    <span aria-hidden className="shrink-0">
+      •
+    </span>
+  );
   return (
-    <span className="font-pixel flex min-w-0 items-center gap-1.5 text-[8px] text-ink-dim">
+    <span className="font-pixel flex min-w-0 flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-[8px] leading-relaxed text-ink-dim">
       <span className="shrink-0">FINAL</span>
-      {outcome && (
+      {outcome && outcome.length === 0 && (
         <>
-          <span aria-hidden className="shrink-0">
-            •
-          </span>
-          <span className="truncate uppercase" style={{ color: outcome.who.ownerColor }}>
-            {outcome.who.ownerName}
-          </span>
-          <span className="shrink-0" style={{ color: outcome.who.ownerColor }}>
-            +{outcome.points}
-          </span>
+          {dot}
+          <span className="shrink-0">NO POINTS</span>
         </>
       )}
+      {outcome?.map(({ who, points }) => (
+        <span key={who.ownerId} className="flex min-w-0 items-center gap-1.5">
+          {dot}
+          <span className="uppercase" style={{ color: who.ownerColor }}>
+            {who.ownerName} +{points}
+          </span>
+        </span>
+      ))}
     </span>
   );
 }

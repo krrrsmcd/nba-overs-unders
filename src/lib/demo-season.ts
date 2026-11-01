@@ -73,7 +73,7 @@ export function demoSeason(seed = 2027) {
     g.awayScore = isHome ? hi : lo;
   }
 
-  // Today's slate (some live, some upcoming) and tomorrow's, for Key Matchups.
+  // Today's slate (some live, some upcoming) and tomorrow's, for Matchups.
   for (const date of [DEMO_TODAY, addDays(DEMO_TODAY, 1)]) {
     const teams = NBA_TEAMS.map((t) => t.id).sort(() => random() - 0.5).slice(0, 16);
     for (let k = 0; k + 1 < teams.length; k += 2) {

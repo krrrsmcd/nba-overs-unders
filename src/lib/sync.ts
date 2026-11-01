@@ -131,7 +131,7 @@ export async function syncScores(
     const today = easternDate(now);
     const yesterday = addDays(today, -1);
     const windowStart = state?.lastCompleteDate ? addDays(state.lastCompleteDate, 1) : REGULAR_SEASON_START;
-    // Fetch through tomorrow so its schedule is available (Key Matchups). Scoring is unaffected:
+    // Fetch through tomorrow so its schedule is available (Matchups). Scoring is unaffected:
     // lastCompleteDate never passes yesterday, so today and tomorrow are always re-fetched.
     const windowEnd = minDate(addDays(today, 1), REGULAR_SEASON_END);
     let fetchedThrough: string | null = null;
